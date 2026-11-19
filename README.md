@@ -1417,3 +1417,19 @@ registry.addMapping("/api/**")
 
 ![허용 출처에 localhost:3000 을 추가한 뒤 같은 요청이 성공](docs/images/099.png)
 
+### 4부. 회원과 작성자 권한 by TDD (100 ~ 130)
+
+| 태그 | 내용 | 핵심 개념 |
+|---|---|---|
+| [`100`](https://github.com/tbafe26/REST4/commit/100) | Member 엔티티(username 유니크), Repository/Service/Controller 뼈대 | 새 도메인 추가, 유니크 제약 |
+
+#### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
+
+여기부터는 글/댓글 API 에 **회원**과 **작성자 권한**을 더합니다. 로그인 기능은 만들지 않고, 요청 주소에 `?actorId=회원번호` 를 붙여 "누가 요청했는지(행위자)" 를 표현합니다. 모든 기능은 테스트를 먼저 작성하고(🔴) 통과시키는(🟢) 순서로 진행합니다.
+
+**무엇을** `domain/member/member` 아래에 `Member` 엔티티(`username`, `password`, `name`), `MemberRepository`(`findByUsername`), 빈 `MemberService`, 빈 `ApiV1MemberController`(`/api/v1/members`) 를 만들었습니다. `username` 에는 `@Column(unique = true)` 를 걸었습니다.
+
+**왜** 회원 기능을 테스트로 시작하려면 테스트가 참조할 컨트롤러 클래스와 서비스가 먼저 있어야 컴파일됩니다. 기능은 없는 뼈대만 두고, 동작은 테스트를 통해 하나씩 채웁니다. username 중복은 애플리케이션 검사와 별개로 DB 제약으로도 막습니다.
+
+**확인** 아직 동작하는 API 는 없습니다.
