@@ -1442,6 +1442,7 @@ registry.addMapping("/api/**")
 | [`118`](https://github.com/tbafe26/REST4/commit/118) | 🟢 글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 행위자 = 작성자 |
 | [`119`](https://github.com/tbafe26/REST4/commit/119) | 🔴 `POST .../comments?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 같은 규칙을 댓글에 |
 | [`120`](https://github.com/tbafe26/REST4/commit/120) | 🟢 댓글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 인증 확인을 가장 먼저 |
+| [`121`](https://github.com/tbafe26/REST4/commit/121) | 🔵 `memberService.getActor(actorId)` 로 중복 제거 | 중복 제거, 테스트가 안전망 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1695,3 +1696,18 @@ Post post = postService.write(actor, reqBody.title, reqBody.content);
 **왜** 119 의 테스트를 통과시키는 구현입니다. 행위자 확인을 **글 조회보다 먼저** 해서, 인증되지 않은 요청에는 다른 정보(글 존재 여부 등)를 확인해 주지 않고 곧바로 401 을 돌려줍니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+#### 121 🔵 행위자 조회를 MemberService.getActor 로 추출
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/121) · [변경 내용](https://github.com/tbafe26/REST4/commit/121)
+
+**무엇을** 세 곳(내 정보, 글 작성, 댓글 작성)에서 반복되던 `findById(actorId).orElseThrow(UnauthenticatedException::new)` 를 `MemberService.getActor(int actorId)` 하나로 옮겼습니다.
+
+```java
+public Member getActor(int actorId) {
+    return findById(actorId).orElseThrow(UnauthenticatedException::new);
+}
+```
+
+**왜** 앞으로 수정/삭제 액션에서도 같은 코드가 필요합니다. "행위자를 확인하고 없으면 401" 이라는 규칙을 한 곳에 두면 규칙이 바뀌어도 한 군데만 고치면 됩니다. 동작은 같으므로 기존 테스트로 확인합니다.
+
+**확인** `./gradlew test`
