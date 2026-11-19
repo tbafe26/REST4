@@ -815,6 +815,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`064`](https://github.com/tbafe26/REST4/commit/064) | 글 삭제 테스트(DELETE, 200-1) | delete() 요청 빌더 |
 | [`065`](https://github.com/tbafe26/REST4/commit/065) | 글 단건조회 테스트, 필드 형태(isNumber/isString) 검증 | 필수 검증 범위 |
 | [`066`](https://github.com/tbafe26/REST4/commit/066) | 단건조회 응답을 DB 값과 대조(선택) | 검증 강도 조절 |
+| [`067`](https://github.com/tbafe26/REST4/commit/067) | 글 다건조회 테스트, 배열 각 원소 검증 | jsonPath 배열 인덱스 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1036,5 +1037,22 @@ resultActions
 **무엇을** 형태 검증을 실제 값 검증으로 바꿨습니다. `postService.findById(id)` 로 꺼낸 글의 id, 날짜(앞 20자리), 제목, 내용과 응답을 비교합니다.
 
 **왜** 형태만 맞고 엉뚱한 글이 올 수도 있습니다. DB 값과 대조하면 더 확실하지만, 이 정도까지 하는 것은 **선택**입니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 067 글 다건조회 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/067) · [변경 내용](https://github.com/tbafe26/REST4/commit/067)
+
+**무엇을** `t5`("글 다건조회") 를 추가했습니다. `postService.findAll()` 로 꺼낸 글 목록을 돌면서 응답 배열의 `$[i].id`, 날짜, 제목, 내용을 대조합니다.
+
+**왜** 목록 응답은 순서와 각 원소의 내용이 모두 중요합니다. 반복문으로 모든 원소를 검사합니다.
+
+```java
+for (int i = 0; i < posts.size(); i++) {
+    Post post = posts.get(i);
+    resultActions.andExpect(jsonPath("$[%d].id".formatted(i)).value(post.getId())) ...;
+}
+```
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
