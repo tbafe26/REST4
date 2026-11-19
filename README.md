@@ -128,6 +128,7 @@ com.back
 | [`020`](https://github.com/tbafe26/REST4/commit/020) | PostDto → record | record, 불변 DTO |
 | [`021`](https://github.com/tbafe26/REST4/commit/021) | DTO 필드명을 createDate/modifyDate/title/content 로 | DTO 덕분에 엔티티 수정 없이 응답 변경 |
 | [`022`](https://github.com/tbafe26/REST4/commit/022) | `.map(PostDto::new)` | 생성자 메서드 참조 |
+| [`023`](https://github.com/tbafe26/REST4/commit/023) | 댓글 다건/단건조회, PostCommentDto | 중첩 리소스 경로, 다중 @PathVariable |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -409,3 +410,24 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 **왜** 람다가 인자를 그대로 생성자에 넘기기만 할 때는 생성자 메서드 참조로 줄여 쓸 수 있습니다. 동작은 같습니다.
 
 **확인** 응답은 이전과 같습니다.
+
+
+#### 023 댓글 다건조회·단건조회 API
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/023) · [변경 내용](https://github.com/tbafe26/REST4/commit/023)
+
+**무엇을** `ApiV1PostCommentController` 와 `PostCommentDto`(record) 를 추가했습니다.
+- `GET /api/v1/posts/{postId}/comments` : 해당 글의 댓글 목록
+- `GET /api/v1/posts/{postId}/comments/{id}` : 해당 글의 댓글 하나
+
+**왜** 댓글은 항상 어떤 글에 속하므로 경로도 `글/{postId}/댓글` 형태로 표현합니다. 댓글은 글(애그리거트 루트)을 통해 꺼내므로 별도 리포지터리 없이 `post.getComments()`, `post.findCommentById(id)` 를 사용합니다. 응답은 처음부터 DTO 로 내보냅니다.
+
+```java
+@GetMapping("/{id}")
+public PostCommentDto getItem(@PathVariable int postId, @PathVariable int id) {
+    Post post = postService.findById(postId).get();
+    PostComment postComment = post.findCommentById(id).get();
+    return new PostCommentDto(postComment);
+}
+```
+
+**확인** `curl http://localhost:8080/api/v1/posts/1/comments` 는 1번 글의 댓글 3개, `.../comments/1` 은 댓글 하나를 반환합니다.
