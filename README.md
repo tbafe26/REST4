@@ -140,6 +140,7 @@ com.back
 | [`030`](https://github.com/tbafe26/REST4/commit/030) | [실험] 글 삭제 응답에 RsData 재사용 | 타입이 고정된 공통 응답의 한계 |
 | [`031`](https://github.com/tbafe26/REST4/commit/031) | ForPostRsData 임시 도입 | 타입별 응답 클래스의 중복 |
 | [`032`](https://github.com/tbafe26/REST4/commit/032) | ForPostRsData 제거, data 타입 Object | 범용화(Object)의 대가 |
+| [`033`](https://github.com/tbafe26/REST4/commit/033) | RsData<T> 제네릭, 글 삭제는 RsData<PostDto> | 제네릭으로 타입 안정성 확보 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -542,3 +543,17 @@ public record RsData(String resultCode, String msg) { }
 **왜** `Object` 로 두면 어떤 데이터든 담을 수 있어 클래스 하나로 통합됩니다. 다만 메서드 시그니처만 보고는 `data` 에 무엇이 들어있는지 알 수 없고, 꺼내 쓸 때 형변환이 필요하다는 단점이 생깁니다.
 
 **확인** 글/댓글 삭제 응답 JSON 은 이전과 같습니다.
+
+
+#### 033 RsData 에 제네릭 적용
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/033) · [변경 내용](https://github.com/tbafe26/REST4/commit/033)
+
+**무엇을** `RsData` 를 `RsData<T>(String resultCode, String msg, T data)` 로 바꾸고 글 삭제의 반환 타입을 `RsData<PostDto>` 로 명시했습니다.
+
+**왜** 하나의 클래스로 모든 응답을 표현하면서도 `data` 의 타입을 컴파일 시점에 알 수 있습니다. 반환 타입만 봐도 어떤 데이터가 오는지 문서처럼 읽힙니다.
+
+```java
+public record RsData<T>(String resultCode, String msg, T data) { }
+```
+
+> **확인해 볼 것** 댓글 삭제는 아직 raw 타입 `RsData` 로 남아 있는데도 컴파일됩니다. raw 타입은 `RsData<Object>` 처럼 동작하지만 타입 검사를 건너뛰므로 지양합니다.
