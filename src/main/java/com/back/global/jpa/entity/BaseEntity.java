@@ -23,7 +23,7 @@ public abstract class BaseEntity {
     private int id;
 
     @CreatedDate // 처음 저장될 때 시각이 자동으로 채워진다
-    private LocalDateTime createdDate;
+    private LocalDateTime createDate;
 
     @LastModifiedDate // 수정될 때마다 시각이 자동으로 갱신된다
     private LocalDateTime modifyDate;

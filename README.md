@@ -120,6 +120,7 @@ com.back
 | [`013`](https://github.com/tbafe26/REST4/commit/013) | 글 단건조회 GET /api/v1/posts/{id} | @PathVariable |
 | [`014`](https://github.com/tbafe26/REST4/commit/014) | [실험] 엔티티 필드명 createDate → createdDate 변경 | 엔티티 = API 스펙, ddl-auto update |
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | [실험] 엔티티 필드명 title/content → subject/body | 엔티티 변경의 파급 범위 |
+| [`016`](https://github.com/tbafe26/REST4/commit/016) | 엔티티 필드명 원상복구 | 엔티티와 API 응답의 분리 필요성 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -306,3 +307,13 @@ public Post getItem(@PathVariable int id) {
 **왜** "응답 JSON 의 키 이름을 바꿔 달라"는 요구를 엔티티를 고쳐서 들어주면 어디까지 바뀌어야 하는지 직접 겪어 봅니다. 이름 하나를 바꾸려고 엔티티, 서비스, 테이블 컬럼까지 손대야 합니다.
 
 **확인** (test 프로파일로 서버 실행 후 `curl http://localhost:8080/api/v1/posts/1`) 응답이 `{"subject":"제목 1","body":"내용 1","comments":[{"body":"댓글 1-1", ...}], ...}` 처럼 바뀌었습니다. 이름 하나를 바꾸려고 엔티티 2개와 서비스까지 고쳐야 했고, 응답 JSON 도 통째로 달라집니다.
+
+
+#### 016 엔티티 필드명 원상복구 — 응답 모양은 DTO 로 맞추기로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/016) · [변경 내용](https://github.com/tbafe26/REST4/commit/016)
+
+**무엇을** 014, 015 에서 바꿨던 `createdDate`, `subject`, `body` 를 모두 원래 이름(`createDate`, `title`, `content`)으로 되돌렸습니다.
+
+**왜** API 에서 쓰는 이름은 클라이언트와 협의하면서 언제든 바뀔 수 있습니다. 그때마다 엔티티와 DB 를 고치는 것은 비용이 너무 큽니다. 엔티티는 그대로 두고, **응답 전용 객체(DTO)** 에서 이름을 맞추는 방향으로 갑니다.
+
+**확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 다시 `createDate`, `title`, `content` 입니다.
