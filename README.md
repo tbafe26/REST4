@@ -1435,6 +1435,7 @@ registry.addMapping("/api/**")
 | [`111`](https://github.com/tbafe26/REST4/commit/111) | 🔴 actorId 누락 시에도 401 기대 | 필수 파라미터 누락 |
 | [`112`](https://github.com/tbafe26/REST4/commit/112) | 🟢 `@RequestParam(defaultValue = "0")` | 누락과 잘못된 값을 한 경로로 |
 | [`113`](https://github.com/tbafe26/REST4/commit/113) | 🔴 샘플 회원 6명(system, admin, user1~4) 기대 | 샘플 데이터도 테스트로 고정 |
+| [`114`](https://github.com/tbafe26/REST4/commit/114) | 🟢 BaseInitData 에 회원 생성(work1) 추가, 글/댓글은 work2 | 초기 데이터 순서 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1605,3 +1606,12 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** 이후 작성자/권한 기능의 테스트는 이 샘플 회원들을 행위자로 씁니다. 샘플 데이터가 테스트의 전제이므로 그 자체도 테스트로 고정해 둡니다.
 
 **확인** `샘플 회원 6명이 생성되어 있다` 테스트가 `expected: 6L but was: 0L` 로 실패합니다. 아직 샘플 회원을 만들지 않습니다.
+
+#### 114 🟢 샘플 회원 6명 생성
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/114) · [변경 내용](https://github.com/tbafe26/REST4/commit/114)
+
+**무엇을** `BaseInitData` 에 회원 6명을 만드는 `work1` 을 추가하고, 기존 글/댓글 생성은 `work2` 로 옮겼습니다. 회원 → 글 순서로 실행하며, 각각 이미 데이터가 있으면 건너뜁니다. 회원은 `memberService.join` 으로 만들어 중복 검사 규칙도 그대로 적용됩니다.
+
+**왜** 글/댓글에 작성자를 붙이려면 회원이 먼저 있어야 합니다. 회원과 글의 생성 여부를 따로 판단하면, 이미 글이 있는 개발 DB 에서도 회원은 새로 만들어집니다.
+
+**확인** `./gradlew test --tests "*BaseInitDataTest"`

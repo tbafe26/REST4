@@ -1,5 +1,6 @@
 package com.back.global.initData;
 
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -17,17 +18,33 @@ public class BaseInitData {
     @Autowired
     @Lazy
     private BaseInitData self;
+    private final MemberService memberService;
     private final PostService postService;
 
     @Bean
     ApplicationRunner baseInitDataApplicationRunner() {
         return args -> {
             self.work1();
+            self.work2();
         };
     }
 
+    // 샘플 회원
     @Transactional
     public void work1() {
+        if (memberService.count() > 0) return;
+
+        memberService.join("system", "12345678", "시스템");
+        memberService.join("admin", "12345678", "관리자");
+        memberService.join("user1", "12345678", "유저1");
+        memberService.join("user2", "12345678", "유저2");
+        memberService.join("user3", "12345678", "유저3");
+        memberService.join("user4", "12345678", "유저4");
+    }
+
+    // 샘플 글과 댓글
+    @Transactional
+    public void work2() {
         // 이미 데이터가 있으면 다시 만들지 않는다 (재시작해도 중복 생성 방지)
         if (postService.count() > 0) return;
 
