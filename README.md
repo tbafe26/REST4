@@ -819,6 +819,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`068`](https://github.com/tbafe26/REST4/commit/068) | `$.length()` 로 글 개수 검증 | 목록 길이 검증 |
 | [`069`](https://github.com/tbafe26/REST4/commit/069) | 🔴 없는 글 조회 시 404, `404-1` 기대 | 실패 시나리오 테스트 |
 | [`070`](https://github.com/tbafe26/REST4/commit/070) | 🟢 GlobalExceptionHandler 로 NoSuchElementException 처리 | @ControllerAdvice, @ExceptionHandler |
+| [`071`](https://github.com/tbafe26/REST4/commit/071) | @RestControllerAdvice + @ResponseStatus(NOT_FOUND) | 예외 응답 상태 코드 지정 방법 A |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1100,3 +1101,13 @@ public class GlobalExceptionHandler {
 **왜** 모든 액션에 try-catch 를 넣는 대신, 예외 → 응답 변환을 **한 곳에** 모읍니다. `Optional.get()` 이 던지는 `NoSuchElementException` 은 "데이터가 없다" 는 뜻이므로 404 로 보냅니다.
 
 > **확인해 볼 것** 응답 본문은 `404-1` 이 되지만, 이 메서드는 `ResponseAspect` 대상(컨트롤러 매핑 메서드)이 아니라서 HTTP 상태 코드가 404 로 바뀌지 않습니다. 다음 단계에서 상태 코드를 직접 지정합니다.
+
+
+#### 071 @RestControllerAdvice 와 @ResponseStatus(NOT_FOUND)
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/071) · [변경 내용](https://github.com/tbafe26/REST4/commit/071)
+
+**무엇을** `@ControllerAdvice` 를 `@RestControllerAdvice` 로 바꿔 `@ResponseBody` 를 없애고, `@ResponseStatus(NOT_FOUND)` 로 상태 코드를 404 로 지정했습니다.
+
+**왜** `@RestControllerAdvice = @ControllerAdvice + @ResponseBody` 입니다(`@RestController` 와 같은 관계). 예외 핸들러는 `ResponseAspect` 가 상태 코드를 바꿔 주지 않으므로 `@ResponseStatus` 로 직접 지정합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"` — 404 테스트(`t6`)가 통과해야 합니다.
