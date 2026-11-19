@@ -1432,6 +1432,7 @@ registry.addMapping("/api/**")
 | [`108`](https://github.com/tbafe26/REST4/commit/108) | 🟢 `GET /me`, MemberDto(password 없음) | @RequestParam, 응답 DTO 로 민감 정보 차단 |
 | [`109`](https://github.com/tbafe26/REST4/commit/109) | 🔴 없는 회원 번호면 401, `401-1` 기대 | 인증 실패(401) |
 | [`110`](https://github.com/tbafe26/REST4/commit/110) | 🟢 UnauthenticatedException → 401-1 | orElseThrow, 인증 예외 |
+| [`111`](https://github.com/tbafe26/REST4/commit/111) | 🔴 actorId 누락 시에도 401 기대 | 필수 파라미터 누락 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1569,3 +1570,12 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** `get()` 은 값이 없을 때 `NoSuchElementException` 을 던져 404 가 됩니다. 상황에 맞는 예외를 직접 지정하면 같은 "값이 없음" 이라도 맥락에 맞는 응답(401)을 줄 수 있습니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 111 🔴 actorId 없이 내 정보 → 401 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/111) · [변경 내용](https://github.com/tbafe26/REST4/commit/111)
+
+**무엇을** `actorId` 없이 `GET /api/v1/members/me` 를 요청하는 테스트 `t6` 을 추가했습니다. 이 경우도 401, `401-1` 이어야 합니다.
+
+**왜** 지금 `@RequestParam int actorId` 는 필수 파라미터라, 빠지면 스프링이 `MissingServletRequestParameterException` 을 던지고 400 계열 응답을 줍니다. 클라이언트 입장에서 "행위자 정보가 없다" 는 것은 존재하지 않는 회원과 같은 의미이므로 같은 401 로 맞춥니다.
+
+**확인** `내 정보, actorId 없음` 테스트가 `Status expected:<401> but was:<400>` 으로 실패합니다. 필수 `@RequestParam` 누락은 스프링이 기본으로 400 처리합니다.
