@@ -126,6 +126,7 @@ com.back
 | [`018`](https://github.com/tbafe26/REST4/commit/018) | `fail-on-empty-beans` 설정 메모 | Jackson 직렬화 설정 |
 | [`019`](https://github.com/tbafe26/REST4/commit/019) | PostDto 에 @Getter | Lombok @Getter, 직렬화 대상 속성 |
 | [`020`](https://github.com/tbafe26/REST4/commit/020) | PostDto → record | record, 불변 DTO |
+| [`021`](https://github.com/tbafe26/REST4/commit/021) | DTO 필드명을 createDate/modifyDate/title/content 로 | DTO 덕분에 엔티티 수정 없이 응답 변경 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -387,3 +388,13 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 ```
 
 **확인** 응답 JSON 은 019 와 같습니다.
+
+
+#### 021 응답 필드명은 DTO 에서만 변경
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/021) · [변경 내용](https://github.com/tbafe26/REST4/commit/021)
+
+**무엇을** 클라이언트와 다시 협의한 결과에 맞춰 `PostDto` 의 필드 이름을 `createDate`, `modifyDate`, `title`, `content` 로 바꿨습니다.
+
+**왜** 이번에는 **DTO 한 파일만** 바뀌었습니다. 엔티티·서비스·DB 는 그대로입니다. 014~015 에서 엔티티를 고쳤을 때와 비교하면 DTO 를 두는 이유가 분명해집니다.
+
+**확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 `id, createDate, modifyDate, title, content` 입니다.
