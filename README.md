@@ -827,6 +827,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`076`](https://github.com/tbafe26/REST4/commit/076) | ApiV1PostCommentControllerTest 설정(MockMvc, PostService) | 테스트 클래스 공통 설정 |
 | [`077`](https://github.com/tbafe26/REST4/commit/077) | 댓글 단건조회 테스트 | 중첩 경로 요청, DB 대조 |
 | [`078`](https://github.com/tbafe26/REST4/commit/078) | 댓글 다건조회 테스트, 개수·원소 검증 | 목록 검증 |
+| [`079`](https://github.com/tbafe26/REST4/commit/079) | 댓글 삭제 테스트(DELETE, 200-1) | 삭제 응답 검증 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1202,5 +1203,15 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **무엇을** `t2`("댓글 다건조회") 를 추가했습니다. 1번 글의 댓글 목록과 응답 배열의 길이, 각 원소(id, 날짜, 내용)를 대조합니다.
 
 **왜** 글 다건조회 테스트에서 배운 대로 길이와 원소를 모두 검증합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+
+#### 079 댓글 삭제 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/079) · [변경 내용](https://github.com/tbafe26/REST4/commit/079)
+
+**무엇을** `t3`("댓글 삭제") 를 추가했습니다. `DELETE /api/v1/posts/1/comments/1` 후 handler(delete), 200, `200-1`, `msg` 를 검증합니다.
+
+**왜** 댓글 삭제 API 를 테스트로 보호합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
