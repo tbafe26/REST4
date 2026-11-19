@@ -809,6 +809,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`058`](https://github.com/tbafe26/REST4/commit/058) | data.post 의 모든 필드 검증 | 응답 스펙을 테스트로 고정 |
 | [`059`](https://github.com/tbafe26/REST4/commit/059) | 🔴 작성 응답 data 를 PostDto 로 기대하도록 테스트 수정 | 요구 변경 시 테스트 먼저 |
 | [`060`](https://github.com/tbafe26/REST4/commit/060) | 🟢 PostWriteResBody 제거, `RsData<PostDto>` | Red → Green |
+| [`061`](https://github.com/tbafe26/REST4/commit/061) | 글 수정 테스트에 handler, resultCode, msg 검증 | 응답 본문 검증 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -970,5 +971,15 @@ resultActions
 **무엇을** `PostWriteResBody` 와 `totalCount` 조회를 없애고 글 작성이 `RsData<PostDto>` 를 반환하게 했습니다. 테스트에서 쓰지 않게 된 `totalCount` 변수도 지웠습니다.
 
 **왜** 059 에서 바꾼 테스트를 통과시키는 최소한의 구현입니다. 테스트가 통과하면 요구 변경이 반영된 것입니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 061 글 수정 테스트 보강
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/061) · [변경 내용](https://github.com/tbafe26/REST4/commit/061)
+
+**무엇을** 글 수정 테스트에서 대상 id 를 변수로 빼고, `handler()`(modify), `resultCode`(`200-1`), `msg` 검증을 추가했습니다.
+
+**왜** 글 작성 테스트와 같은 수준으로 응답 본문까지 검증해야 수정 API 의 스펙이 테스트로 고정됩니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
