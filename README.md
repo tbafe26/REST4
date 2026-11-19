@@ -828,6 +828,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`077`](https://github.com/tbafe26/REST4/commit/077) | 댓글 단건조회 테스트 | 중첩 경로 요청, DB 대조 |
 | [`078`](https://github.com/tbafe26/REST4/commit/078) | 댓글 다건조회 테스트, 개수·원소 검증 | 목록 검증 |
 | [`079`](https://github.com/tbafe26/REST4/commit/079) | 댓글 삭제 테스트(DELETE, 200-1) | 삭제 응답 검증 |
+| [`080`](https://github.com/tbafe26/REST4/commit/080) | 댓글 수정 테스트(PUT, 200-1) | 수정 응답 검증 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1213,5 +1214,15 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **무엇을** `t3`("댓글 삭제") 를 추가했습니다. `DELETE /api/v1/posts/1/comments/1` 후 handler(delete), 200, `200-1`, `msg` 를 검증합니다.
 
 **왜** 댓글 삭제 API 를 테스트로 보호합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+
+#### 080 댓글 수정 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/080) · [변경 내용](https://github.com/tbafe26/REST4/commit/080)
+
+**무엇을** `t4`("댓글 수정") 를 추가했습니다. `PUT /api/v1/posts/1/comments/1` 에 `{"content": "내용 new"}` 를 보내고 handler(modify), 200, `200-1`, `msg` 를 검증합니다.
+
+**왜** 댓글 수정 API 를 테스트로 보호합니다. 이로써 댓글 작성을 제외한 댓글 API 가 모두 테스트로 덮였습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
