@@ -1449,6 +1449,7 @@ registry.addMapping("/api/**")
 | [`125`](https://github.com/tbafe26/REST4/commit/125) | 🟢 `post.checkActorCanModify(actor)` | 수정 권한 검사 |
 | [`126`](https://github.com/tbafe26/REST4/commit/126) | 🔴 댓글 삭제: 작성자 성공, 타인 403, actorId 없음 401 | 같은 규칙을 댓글에 |
 | [`127`](https://github.com/tbafe26/REST4/commit/127) | 🟢 `postComment.checkActorCanDelete(actor)` | 댓글 삭제 권한 검사 |
+| [`128`](https://github.com/tbafe26/REST4/commit/128) | 🔴 댓글 수정: 작성자 성공, 타인 403, actorId 없음 401 | 마지막 권한 규칙 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1782,3 +1783,12 @@ public void checkActorCanDelete(Member actor) {
 **왜** 126 의 테스트를 통과시키는 구현입니다. 글과 같은 방식(엔티티가 권한을 판단, 전역 핸들러가 403 응답)을 댓글에 적용합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+#### 128 🔴 댓글 수정은 작성자 본인만 — 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/128) · [변경 내용](https://github.com/tbafe26/REST4/commit/128)
+
+**무엇을** 댓글 수정 테스트 `t4` 를 1번 댓글의 작성자(user1)를 행위자로 요청하도록 바꾸고, 타인(user2) → 403(`t11`), `actorId` 없음 → 401(`t12`) 테스트를 추가했습니다.
+
+**왜** 수정/삭제 권한 규칙의 마지막 조각입니다. 지금은 누구든 댓글을 수정할 수 있어 새 테스트가 실패합니다.
+
+**확인** `댓글 수정, 작성자가 아닌 회원` 은 `Status expected:<403> but was:<200>`, `댓글 수정, actorId 없음` 은 `Status expected:<401> but was:<200>` 으로 실패합니다. 지금은 누구든 수정할 수 있습니다. 작성자 본인 테스트는 통과합니다.
