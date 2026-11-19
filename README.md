@@ -1220,6 +1220,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`086`](https://github.com/tbafe26/REST4/commit/086) | `@OpenAPIDefinition(info = @Info(...))` | 문서 메타 정보 |
 | [`087`](https://github.com/tbafe26/REST4/commit/087) | `GET /` 메인 페이지(서버 정보, 문서 링크) | 접속 안내 페이지 |
 | [`088`](https://github.com/tbafe26/REST4/commit/088) | `apiV1`(/api/v1/**) 과 `home`(그 외) 그룹 | GroupedOpenApi |
+| [`089`](https://github.com/tbafe26/REST4/commit/089) | 매핑마다 `produces = APPLICATION_JSON_VALUE` | 문서의 응답 미디어 타입 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1272,3 +1273,11 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 
 ![오른쪽 위 Select a definition 에서 apiV1 / home 그룹을 고를 수 있다](docs/images/088.png)
 
+#### 089 문서의 응답 미디어 타입을 JSON 으로 — produces 지정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/089) · [변경 내용](https://github.com/tbafe26/REST4/commit/089)
+
+**무엇을** 글 다건/단건조회 매핑에 `produces = APPLICATION_JSON_VALUE` 를 지정했습니다.
+
+**왜** 기본 설정에서는 Swagger UI 가 응답 미디어 타입을 `*/*` 로 표시해, 문서에서 호출했을 때 결과가 JSON 으로 예쁘게 보이지 않습니다. 매핑에 응답 형식을 명시하면 문서에 `application/json` 으로 나옵니다. 다만 모든 매핑에 일일이 붙이는 것은 번거롭습니다.
+
+**확인** Swagger UI 의 글 조회 API 응답 타입이 `application/json` 으로 표시됩니다.
