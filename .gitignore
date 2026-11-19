@@ -1,0 +1,23 @@
+### 작업 메모 ###
+PLAN.md
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### VS Code ###
+.vscode/
+
+### 비밀 설정 ###
+.env
+*.env
+application-secret.yaml
