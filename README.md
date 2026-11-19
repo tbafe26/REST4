@@ -146,6 +146,7 @@ com.back
 | [`036`](https://github.com/tbafe26/REST4/commit/036) | 글/댓글 삭제 → `DELETE /{id}` | HTTP 메서드의 의미 |
 | [`037`](https://github.com/tbafe26/REST4/commit/037) | 글 작성 `POST /api/v1/posts`, JSON 본문 + 검증 | @RequestBody, @Valid |
 | [`038`](https://github.com/tbafe26/REST4/commit/038) | PostWriteForm → PostWriteReqBody | 이름이 역할을 드러내게 |
+| [`039`](https://github.com/tbafe26/REST4/commit/039) | 작성 응답 data 를 List(totalCount, post) 로 | data 에 여러 값 담기 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -629,3 +630,13 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 **왜** REST API 에는 HTML 폼이 없습니다. 이 객체는 **요청 본문(Request Body)** 을 담는 것이므로 이름도 그 역할을 드러내게 합니다. 이후 응답 본문 전용 객체는 `...ResBody` 로 짝을 맞춥니다.
 
 **확인** 동작은 이전과 같습니다.
+
+
+#### 039 글 작성 응답에 전체 글 수 추가 — List
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/039) · [변경 내용](https://github.com/tbafe26/REST4/commit/039)
+
+**무엇을** 글 작성 후 전체 글 수(`totalCount`)도 함께 달라는 요구에 맞춰 `data` 를 `List.of(totalCount, new PostDto(post))` 로 바꿨습니다. 반환 타입은 `RsData<List<Object>>` 입니다.
+
+**왜** `RsData.data` 에는 값을 하나만 담을 수 있으므로 여러 값을 담으려면 묶어야 합니다. 가장 먼저 떠오르는 방법인 List 로 시도해 봅니다. 결과 JSON 은 `[3, {...}]` 처럼 **각 값이 무엇인지 이름이 없습니다.**
+
+**확인** `data` 가 `[4, {"id":4, ...}]` 형태의 배열로 나옵니다.
