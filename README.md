@@ -1443,6 +1443,7 @@ registry.addMapping("/api/**")
 | [`119`](https://github.com/tbafe26/REST4/commit/119) | 🔴 `POST .../comments?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 같은 규칙을 댓글에 |
 | [`120`](https://github.com/tbafe26/REST4/commit/120) | 🟢 댓글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 인증 확인을 가장 먼저 |
 | [`121`](https://github.com/tbafe26/REST4/commit/121) | 🔵 `memberService.getActor(actorId)` 로 중복 제거 | 중복 제거, 테스트가 안전망 |
+| [`122`](https://github.com/tbafe26/REST4/commit/122) | 🔴 글 삭제: 작성자 성공, 타인 403, actorId 없음 401 | 인증(401)과 인가(403)의 구분 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1711,3 +1712,12 @@ public Member getActor(int actorId) {
 **왜** 앞으로 수정/삭제 액션에서도 같은 코드가 필요합니다. "행위자를 확인하고 없으면 401" 이라는 규칙을 한 곳에 두면 규칙이 바뀌어도 한 군데만 고치면 됩니다. 동작은 같으므로 기존 테스트로 확인합니다.
 
 **확인** `./gradlew test`
+
+#### 122 🔴 글 삭제는 작성자 본인만 — 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/122) · [변경 내용](https://github.com/tbafe26/REST4/commit/122)
+
+**무엇을** 글 삭제 테스트 `t3` 을 1번 글의 작성자(user1)를 행위자로 요청하도록 바꿨습니다. 작성자가 아닌 회원(user2)이 삭제하면 403, `403-1`, `권한이 없습니다.`(`t13`), `actorId` 없이 삭제하면 401(`t14`) 이어야 한다는 테스트를 추가했습니다.
+
+**왜** **401(인증 실패)** 은 "누구인지 모른다", **403(인가 실패)** 은 "누구인지는 알지만 이 작업을 할 권한이 없다" 입니다. 두 상황을 다른 응답으로 구분해야 클라이언트가 "로그인 유도" 와 "권한 없음 안내" 를 다르게 처리할 수 있습니다. 지금은 누구든 삭제할 수 있어 두 테스트가 실패합니다.
+
+**확인** `글 삭제, 작성자가 아닌 회원` 은 `Status expected:<403> but was:<200>`, `글 삭제, actorId 없음` 은 `Status expected:<401> but was:<200>` 으로 실패합니다. 지금은 누구든 삭제할 수 있습니다. 작성자 본인 테스트는 통과합니다.
