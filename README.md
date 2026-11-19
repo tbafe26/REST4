@@ -1422,6 +1422,7 @@ registry.addMapping("/api/**")
 | 태그 | 내용 | 핵심 개념 |
 |---|---|---|
 | [`100`](https://github.com/tbafe26/REST4/commit/100) | Member 엔티티(username 유니크), Repository/Service/Controller 뼈대 | 새 도메인 추가, 유니크 제약 |
+| [`101`](https://github.com/tbafe26/REST4/commit/101) | 🔴 `POST /api/v1/members/join` 성공 테스트(201-1) | 테스트 먼저 작성 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1433,3 +1434,12 @@ registry.addMapping("/api/**")
 **왜** 회원 기능을 테스트로 시작하려면 테스트가 참조할 컨트롤러 클래스와 서비스가 먼저 있어야 컴파일됩니다. 기능은 없는 뼈대만 두고, 동작은 테스트를 통해 하나씩 채웁니다. username 중복은 애플리케이션 검사와 별개로 DB 제약으로도 막습니다.
 
 **확인** 아직 동작하는 API 는 없습니다.
+
+#### 101 🔴 회원가입 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/101) · [변경 내용](https://github.com/tbafe26/REST4/commit/101)
+
+**무엇을** `ApiV1MemberControllerTest` 를 만들고 회원가입 테스트 `t1` 을 먼저 작성했습니다. `{"username": "user10", "password": "12345678", "name": "유저10"}` 으로 가입하면 201, `201-1`, `유저10님 환영합니다. 회원가입이 완료되었습니다.` 가 와야 하고, 가장 최근 회원의 username 이 `user10` 이어야 합니다. 최근 회원을 꺼내기 위해 `MemberRepository.findTopByOrderByIdDesc()`, `MemberService.findLatest()` 를 추가했습니다.
+
+**왜** 기능을 만들기 전에 "어떤 요청에 어떤 응답이 와야 하는지" 를 테스트로 고정합니다. 이 테스트를 통과시키는 것이 다음 단계의 목표입니다.
+
+**확인** `회원가입` 테스트가 `NoSuchElementException: No value present` 로 실패합니다. 가입 API 가 없어 회원이 저장되지 않았고, `findLatest()` 가 비어 있습니다.
