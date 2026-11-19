@@ -816,6 +816,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`065`](https://github.com/tbafe26/REST4/commit/065) | 글 단건조회 테스트, 필드 형태(isNumber/isString) 검증 | 필수 검증 범위 |
 | [`066`](https://github.com/tbafe26/REST4/commit/066) | 단건조회 응답을 DB 값과 대조(선택) | 검증 강도 조절 |
 | [`067`](https://github.com/tbafe26/REST4/commit/067) | 글 다건조회 테스트, 배열 각 원소 검증 | jsonPath 배열 인덱스 |
+| [`068`](https://github.com/tbafe26/REST4/commit/068) | `$.length()` 로 글 개수 검증 | 목록 길이 검증 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1054,5 +1055,15 @@ for (int i = 0; i < posts.size(); i++) {
     resultActions.andExpect(jsonPath("$[%d].id".formatted(i)).value(post.getId())) ...;
 }
 ```
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 068 글 다건조회 개수 검증
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/068) · [변경 내용](https://github.com/tbafe26/REST4/commit/068)
+
+**무엇을** 응답 배열 길이(`$.length()`)가 DB 의 글 수와 같은지 검증합니다.
+
+**왜** 반복문 검증은 DB 목록 길이만큼만 돌기 때문에, 응답에 **원소가 더 많은 경우**는 잡지 못합니다. 길이를 따로 검사해 빈틈을 메웁니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
