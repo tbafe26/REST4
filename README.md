@@ -1441,6 +1441,7 @@ registry.addMapping("/api/**")
 | [`117`](https://github.com/tbafe26/REST4/commit/117) | 🔴 `POST /api/v1/posts?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 요구 변경 시 기존 테스트 먼저 수정 |
 | [`118`](https://github.com/tbafe26/REST4/commit/118) | 🟢 글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 행위자 = 작성자 |
 | [`119`](https://github.com/tbafe26/REST4/commit/119) | 🔴 `POST .../comments?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 같은 규칙을 댓글에 |
+| [`120`](https://github.com/tbafe26/REST4/commit/120) | 🟢 댓글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 인증 확인을 가장 먼저 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1685,3 +1686,12 @@ Post post = postService.write(actor, reqBody.title, reqBody.content);
 **왜** 글 작성과 같은 요구를 댓글에도 적용합니다. 지금은 임시 `system` 작성자라서 실패합니다.
 
 **확인** 3개 테스트가 실패합니다. `댓글 작성`: `$.data.authorId expected:<4> but was:<1>`(user2 가 아니라 임시 작성자 system), `actorId 없음`/`존재하지 않는 actorId`: `Status expected:<401> but was:<201>`.
+
+#### 120 🟢 댓글 작성자를 actorId 행위자로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/120) · [변경 내용](https://github.com/tbafe26/REST4/commit/120)
+
+**무엇을** 댓글 작성 액션도 `actorId` 로 행위자를 찾고(없으면 401), 그 회원을 작성자로 저장합니다. 임시 `system` 작성자는 지웠습니다.
+
+**왜** 119 의 테스트를 통과시키는 구현입니다. 행위자 확인을 **글 조회보다 먼저** 해서, 인증되지 않은 요청에는 다른 정보(글 존재 여부 등)를 확인해 주지 않고 곧바로 401 을 돌려줍니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
