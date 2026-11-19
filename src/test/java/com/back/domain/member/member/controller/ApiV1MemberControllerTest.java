@@ -57,4 +57,44 @@ public class ApiV1MemberControllerTest {
         // 실제로 저장되었는지 확인
         assertThat(member.getUsername()).isEqualTo("user10");
     }
+
+    @Test
+    @DisplayName("회원가입, 중복된 username")
+    void t2() throws Exception {
+        mvc
+                .perform(
+                        post("/api/v1/members/join")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "username": "user10",
+                                            "password": "12345678",
+                                            "name": "유저10"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        // 같은 username 으로 한 번 더 가입
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/members/join")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "username": "user10",
+                                            "password": "12345678",
+                                            "name": "유저10"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1MemberController.class))
+                .andExpect(handler().methodName("join"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.resultCode").value("409-1"))
+                .andExpect(jsonPath("$.msg").value("user10(은)는 이미 사용중인 username 입니다."));
+    }
 }

@@ -1424,6 +1424,7 @@ registry.addMapping("/api/**")
 | [`100`](https://github.com/tbafe26/REST4/commit/100) | Member 엔티티(username 유니크), Repository/Service/Controller 뼈대 | 새 도메인 추가, 유니크 제약 |
 | [`101`](https://github.com/tbafe26/REST4/commit/101) | 🔴 `POST /api/v1/members/join` 성공 테스트(201-1) | 테스트 먼저 작성 |
 | [`102`](https://github.com/tbafe26/REST4/commit/102) | 🟢 회원가입 구현, MemberJoinReqBody 제약 | @Valid, RsData<Void> |
+| [`103`](https://github.com/tbafe26/REST4/commit/103) | 🔴 username 중복 시 409, `409-1` 기대 | 실패 시나리오 먼저 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1462,3 +1463,12 @@ public RsData<Void> join(@RequestBody @Valid MemberJoinReqBody reqBody) {
 **왜** 101 의 테스트를 통과시키는 최소 구현입니다. 글 API 에서 만든 규칙(ReqBody + `@Valid`, `RsData`, resultCode 로 상태 코드 결정)을 그대로 따릅니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 103 🔴 중복된 username 으로 회원가입 → 409 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/103) · [변경 내용](https://github.com/tbafe26/REST4/commit/103)
+
+**무엇을** 같은 `username` 으로 두 번 가입하는 테스트 `t2` 를 추가했습니다. 두 번째 요청에는 409(Conflict), `409-1`, `user10(은)는 이미 사용중인 username 입니다.` 가 와야 합니다.
+
+**왜** 지금은 중복 검사를 하지 않아 두 번째 저장이 DB 유니크 제약에 걸립니다. 클라이언트가 이해할 수 있는 응답을 원하는 결과로 먼저 정의합니다. 409 는 "요청이 현재 리소스 상태와 충돌한다" 는 뜻으로 중복 가입에 맞는 코드입니다.
+
+**확인** `회원가입, 중복된 username` 테스트가 `DataIntegrityViolationException`(Unique index or primary key violation) 으로 실패합니다. 애플리케이션이 중복을 검사하지 않아 DB 유니크 제약까지 가서 터집니다.
