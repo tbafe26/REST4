@@ -150,6 +150,7 @@ com.back
 | [`040`](https://github.com/tbafe26/REST4/commit/040) | List → Map(totalCount, post) | 이름 있는 응답 필드 |
 | [`041`](https://github.com/tbafe26/REST4/commit/041) | Map → 전용 record PostWriteResBody | 액션별 응답 본문 타입 |
 | [`042`](https://github.com/tbafe26/REST4/commit/042) | 지역 변수 제거, 인라인 생성 | 가독성 정리 |
+| [`043`](https://github.com/tbafe26/REST4/commit/043) | 작성 성공 resultCode `201-1` | 201 Created, resultCode ≠ HTTP 상태 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -677,3 +678,13 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 **왜** 한 번만 쓰는 변수는 줄이고 응답 구조가 코드 모양에 그대로 드러나게 합니다. 동작은 같습니다.
 
 **확인** 응답 JSON 은 이전과 같습니다.
+
+
+#### 043 글 작성 resultCode 를 201-1 로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/043) · [변경 내용](https://github.com/tbafe26/REST4/commit/043)
+
+**무엇을** 글 작성 성공의 `resultCode` 를 `200-1` 에서 `201-1` 로 바꿨습니다.
+
+**왜** 201(Created)은 "성공했고, 그 결과 무언가가 새로 생성됐다"는 뜻으로 작성 성공에 가장 정확한 코드입니다. 그런데 `resultCode` 는 응답 본문 안의 문자열일 뿐이라 **실제 HTTP 응답 상태 코드는 여전히 200** 입니다.
+
+> **확인해 볼 것** `curl -i -X POST ...` 로 응답 헤더를 보면 상태 줄은 `200` 인데 본문의 `resultCode` 만 `201-1` 입니다.
