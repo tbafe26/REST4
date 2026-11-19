@@ -1221,6 +1221,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`087`](https://github.com/tbafe26/REST4/commit/087) | `GET /` 메인 페이지(서버 정보, 문서 링크) | 접속 안내 페이지 |
 | [`088`](https://github.com/tbafe26/REST4/commit/088) | `apiV1`(/api/v1/**) 과 `home`(그 외) 그룹 | GroupedOpenApi |
 | [`089`](https://github.com/tbafe26/REST4/commit/089) | 매핑마다 `produces = APPLICATION_JSON_VALUE` | 문서의 응답 미디어 타입 |
+| [`090`](https://github.com/tbafe26/REST4/commit/090) | `springdoc.default-produces-media-type` 설정 | 설정으로 일괄 적용 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1281,3 +1282,17 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 **왜** 기본 설정에서는 Swagger UI 가 응답 미디어 타입을 `*/*` 로 표시해, 문서에서 호출했을 때 결과가 JSON 으로 예쁘게 보이지 않습니다. 매핑에 응답 형식을 명시하면 문서에 `application/json` 으로 나옵니다. 다만 모든 매핑에 일일이 붙이는 것은 번거롭습니다.
 
 **확인** Swagger UI 의 글 조회 API 응답 타입이 `application/json` 으로 표시됩니다.
+
+#### 090 기본 응답 미디어 타입을 설정 파일로 지정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/090) · [변경 내용](https://github.com/tbafe26/REST4/commit/090)
+
+**무엇을** 089 에서 붙인 `produces` 를 걷어내고 `application.yaml` 에 다음 설정을 넣었습니다.
+
+```yaml
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
+```
+
+**왜** 매핑마다 반복하는 대신 설정 한 줄로 모든 API 의 기본 응답 타입을 JSON 으로 지정합니다.
+
+**확인** Swagger UI 의 모든 API 응답 타입이 `application/json;charset=UTF-8` 로 표시됩니다.
