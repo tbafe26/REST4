@@ -24,6 +24,10 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    public Optional<Member> findById(int id) {
+        return memberRepository.findById(id);
+    }
+
     public Optional<Member> findLatest() {
         return memberRepository.findTopByOrderByIdDesc();
     }

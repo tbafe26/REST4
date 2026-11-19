@@ -1429,6 +1429,7 @@ registry.addMapping("/api/**")
 | [`105`](https://github.com/tbafe26/REST4/commit/105) | 🔵 `findByUsername(...).ifPresent(_ -> throw)` | Optional, 이름 없는 변수 `_` |
 | [`106`](https://github.com/tbafe26/REST4/commit/106) | 제약 위반 시 400, `400-1` 테스트 | 기존 핸들러 재사용 확인 |
 | [`107`](https://github.com/tbafe26/REST4/commit/107) | 🔴 `GET /api/v1/members/me?actorId=` 테스트, password 미노출 | 행위자(actorId), 민감 정보 비노출 |
+| [`108`](https://github.com/tbafe26/REST4/commit/108) | 🟢 `GET /me`, MemberDto(password 없음) | @RequestParam, 응답 DTO 로 민감 정보 차단 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1525,3 +1526,20 @@ memberRepository.findByUsername(username)
 **왜** 로그인 기능이 없으므로 "누가 요청했는지" 는 `actorId` 쿼리 파라미터로 표현합니다. 응답에 비밀번호가 섞여 나가는 실수를 막기 위해 `jsonPath("$.password").doesNotExist()` 로 명시적으로 검증합니다.
 
 **확인** `내 정보` 테스트가 `Handler type expected:<ApiV1MemberController> but was:<ResourceHttpRequestHandler>` 로 실패합니다. `/me` 매핑이 없어 정적 리소스 처리기가 요청을 받았습니다.
+
+#### 108 🟢 내 정보 API 와 MemberDto
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/108) · [변경 내용](https://github.com/tbafe26/REST4/commit/108)
+
+**무엇을** `GET /api/v1/members/me` 를 구현했습니다. `@RequestParam int actorId` 로 받은 번호의 회원을 찾아 `MemberDto` 로 응답합니다. `MemberDto` 에는 `password` 필드가 아예 없습니다. `MemberService.findById` 를 추가했고, 테스트 파일의 import 순서를 정리했습니다.
+
+```java
+@GetMapping("/me")
+public MemberDto me(@RequestParam int actorId) {
+    Member actor = memberService.findById(actorId).get();
+    return new MemberDto(actor);
+}
+```
+
+**왜** 엔티티를 그대로 반환하면 `password` 까지 JSON 으로 나갑니다. 응답 전용 DTO 에서 필요한 필드만 고르면 민감 정보가 실수로 노출될 수 없습니다(1부에서 DTO 를 도입한 이유와 같습니다).
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`

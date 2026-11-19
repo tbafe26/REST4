@@ -1,5 +1,6 @@
 package com.back.domain.member.member.controller;
 
+import com.back.domain.member.member.dto.MemberDto;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.rsData.RsData;
@@ -45,5 +46,17 @@ public class ApiV1MemberController {
                 "201-1",
                 "%s님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getName())
         );
+    }
+
+
+    @GetMapping("/me")
+    @Transactional(readOnly = true)
+    @Operation(summary = "내 정보")
+    public MemberDto me(
+            @RequestParam int actorId
+    ) {
+        Member actor = memberService.findById(actorId).get();
+
+        return new MemberDto(actor);
     }
 }
