@@ -54,7 +54,7 @@ public class ApiV1MemberController {
     @Transactional(readOnly = true)
     @Operation(summary = "내 정보")
     public MemberDto me(
-            @RequestParam int actorId
+            @RequestParam(defaultValue = "0") int actorId // 없으면 0 → 존재하지 않는 회원 → 401
     ) {
         Member actor = memberService.findById(actorId).orElseThrow(
                 UnauthenticatedException::new
