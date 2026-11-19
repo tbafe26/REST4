@@ -2,6 +2,7 @@ package com.back.domain.post.post.entity;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.post.postComment.entity.PostComment;
+import com.back.global.globalExceptionHandler.AccessDeniedException;
 import com.back.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -53,6 +54,13 @@ public class Post extends BaseEntity {
                 .stream()
                 .filter(comment -> comment.getId() == id)
                 .findFirst();
+    }
+
+    // 작성자 본인이 아니면 삭제할 수 없다 (id 로 비교: author 는 지연 로딩 프록시일 수 있다)
+    public void checkActorCanDelete(Member actor) {
+        if (author.getId() != actor.getId()) {
+            throw new AccessDeniedException();
+        }
     }
 
     public boolean deleteComment(PostComment postComment) {

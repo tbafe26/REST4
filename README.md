@@ -1444,6 +1444,7 @@ registry.addMapping("/api/**")
 | [`120`](https://github.com/tbafe26/REST4/commit/120) | 🟢 댓글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 인증 확인을 가장 먼저 |
 | [`121`](https://github.com/tbafe26/REST4/commit/121) | 🔵 `memberService.getActor(actorId)` 로 중복 제거 | 중복 제거, 테스트가 안전망 |
 | [`122`](https://github.com/tbafe26/REST4/commit/122) | 🔴 글 삭제: 작성자 성공, 타인 403, actorId 없음 401 | 인증(401)과 인가(403)의 구분 |
+| [`123`](https://github.com/tbafe26/REST4/commit/123) | 🟢 `post.checkActorCanDelete(actor)`, AccessDeniedException → 403-1 | 권한 검사는 엔티티에, 응답 변환은 핸들러에 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1721,3 +1722,23 @@ public Member getActor(int actorId) {
 **왜** **401(인증 실패)** 은 "누구인지 모른다", **403(인가 실패)** 은 "누구인지는 알지만 이 작업을 할 권한이 없다" 입니다. 두 상황을 다른 응답으로 구분해야 클라이언트가 "로그인 유도" 와 "권한 없음 안내" 를 다르게 처리할 수 있습니다. 지금은 누구든 삭제할 수 있어 두 테스트가 실패합니다.
 
 **확인** `글 삭제, 작성자가 아닌 회원` 은 `Status expected:<403> but was:<200>`, `글 삭제, actorId 없음` 은 `Status expected:<401> but was:<200>` 으로 실패합니다. 지금은 누구든 삭제할 수 있습니다. 작성자 본인 테스트는 통과합니다.
+
+#### 123 🟢 AccessDeniedException 으로 작성자 외 삭제 차단
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/123) · [변경 내용](https://github.com/tbafe26/REST4/commit/123)
+
+**무엇을**
+- `AccessDeniedException`(메시지 `권한이 없습니다.`) 과 403, `403-1` 핸들러를 추가했습니다.
+- `Post.checkActorCanDelete(actor)` 가 작성자와 행위자가 다르면 예외를 던집니다.
+- 글 삭제 액션은 `actorId` 로 행위자를 확인(401) → 글 조회 → 권한 확인(403) → 삭제 순서로 동작합니다.
+
+```java
+public void checkActorCanDelete(Member actor) {
+    if (author.getId() != actor.getId()) {
+        throw new AccessDeniedException();
+    }
+}
+```
+
+**왜** "이 회원이 이 글을 지울 수 있는가" 는 글이 가장 잘 아는 규칙이므로 엔티티 메서드로 둡니다. 비교는 객체가 아니라 **id** 로 합니다. `author` 는 지연 로딩 프록시일 수 있어서 클래스가 달라 `equals` 비교가 실패할 수 있기 때문입니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
