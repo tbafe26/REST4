@@ -799,6 +799,7 @@ public RsData(String resultCode, String msg, T data) {
 |---|---|---|
 | [`049`](https://github.com/tbafe26/REST4/commit/049) | ApiV1PostControllerTest, ApiV1PostCommentControllerTest 생성 | 컨트롤러 테스트 준비 |
 | [`050`](https://github.com/tbafe26/REST4/commit/050) | 글 작성 요청 테스트(MockMvc) | @SpringBootTest, @AutoConfigureMockMvc, @Transactional 롤백 |
+| [`051`](https://github.com/tbafe26/REST4/commit/051) | `.andDo(print())` | 테스트 중 요청/응답 확인 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -836,3 +837,13 @@ public class ApiV1PostControllerTest {
 **왜** 실제 톰캣을 띄우지 않고도 Postman 처럼 요청을 보낼 수 있어야 테스트가 빠르고 반복 가능합니다. `@Transactional` 덕분에 테스트에서 만든 글은 롤백되어 다른 테스트에 영향을 주지 않습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 051 요청과 응답을 출력하는 andDo(print())
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/051) · [변경 내용](https://github.com/tbafe26/REST4/commit/051)
+
+**무엇을** 요청 뒤에 `.andDo(print())` 를 붙였고, 050 에서 설명용으로 단 어노테이션 주석은 정리했습니다.
+
+**왜** 테스트 실행 로그에 요청(메서드, URI, 본문)과 응답(상태, 헤더, 본문)이 모두 찍혀서 무엇이 오갔는지 눈으로 확인하며 검증 코드를 작성할 수 있습니다.
+
+**확인** 테스트 실행 로그에 `MockHttpServletResponse: Status = ..., Body = ...` 가 출력됩니다.
