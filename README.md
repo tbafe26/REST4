@@ -134,6 +134,7 @@ com.back
 | [`025`](https://github.com/tbafe26/REST4/commit/025) | 액션 메서드에 @Transactional / readOnly | 영속성 컨텍스트, orphanRemoval, readOnly 트랜잭션 |
 | [`026`](https://github.com/tbafe26/REST4/commit/026) | 삭제 응답을 Map(resultCode, msg) 으로 | 조회 외 응답의 결과 코드·메시지 |
 | [`027`](https://github.com/tbafe26/REST4/commit/027) | RsData(resultCode, msg) record | 공통 응답 객체 |
+| [`028`](https://github.com/tbafe26/REST4/commit/028) | RsData 에 data(PostCommentDto) 추가 | 부가 데이터 응답 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -486,3 +487,13 @@ public record RsData(String resultCode, String msg) { }
 ```
 
 **확인** 응답 JSON 은 026 과 같습니다.
+
+
+#### 028 RsData 에 data 필드 추가
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/028) · [변경 내용](https://github.com/tbafe26/REST4/commit/028)
+
+**무엇을** `RsData` 에 세 번째 필드 `data` 를 추가하고, 댓글 삭제 시 삭제된 댓글의 `PostCommentDto` 를 담아 응답합니다. 지금은 타입이 `PostCommentDto` 로 고정되어 있습니다.
+
+**왜** `resultCode` 와 `msg` 만으로는 표현하기 어려운 부가 정보(삭제된 댓글 내용, 새로 만든 글의 id 등)를 함께 돌려주면 클라이언트가 추가 요청을 하지 않아도 됩니다.
+
+**확인** 삭제 응답에 `"data": {"id":1, ..., "content":"댓글 1-1"}` 이 포함됩니다.
