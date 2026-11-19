@@ -135,6 +135,7 @@ com.back
 | [`026`](https://github.com/tbafe26/REST4/commit/026) | 삭제 응답을 Map(resultCode, msg) 으로 | 조회 외 응답의 결과 코드·메시지 |
 | [`027`](https://github.com/tbafe26/REST4/commit/027) | RsData(resultCode, msg) record | 공통 응답 객체 |
 | [`028`](https://github.com/tbafe26/REST4/commit/028) | RsData 에 data(PostCommentDto) 추가 | 부가 데이터 응답 |
+| [`029`](https://github.com/tbafe26/REST4/commit/029) | 글 삭제(GET 임시) | CascadeType.REMOVE |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -497,3 +498,13 @@ public record RsData(String resultCode, String msg) { }
 **왜** `resultCode` 와 `msg` 만으로는 표현하기 어려운 부가 정보(삭제된 댓글 내용, 새로 만든 글의 id 등)를 함께 돌려주면 클라이언트가 추가 요청을 하지 않아도 됩니다.
 
 **확인** 삭제 응답에 `"data": {"id":1, ..., "content":"댓글 1-1"}` 이 포함됩니다.
+
+
+#### 029 글 삭제 API
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/029) · [변경 내용](https://github.com/tbafe26/REST4/commit/029)
+
+**무엇을** `GET /api/v1/posts/{id}/delete`(임시) 로 글을 삭제하고 삭제된 글의 `PostDto` 를 반환합니다. `PostService.delete(post)` 는 `postRepository.delete(post)` 를 호출합니다.
+
+**왜** 글에는 댓글이 딸려 있지만 `Post.comments` 에 `CascadeType.REMOVE` 가 걸려 있어서, 글을 지우면 JPA 가 관련 댓글을 **먼저** 삭제한 뒤 글을 삭제합니다. 외래키 제약 때문에 직접 댓글을 지울 필요가 없습니다.
+
+**확인** `curl http://localhost:8080/api/v1/posts/1/delete` 후 SQL 로그에 댓글 DELETE 들이 글 DELETE 보다 먼저 찍힙니다.
