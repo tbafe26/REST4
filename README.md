@@ -10,6 +10,8 @@
 - [기술 스택과 실행 방법](#기술-스택과-실행-방법)
 - [커밋 따라가는 방법](#커밋-따라가는-방법)
 - [실험 커밋 목록](#실험-커밋-목록)
+- [패키지 구조](#패키지-구조)
+- [API 명세](#API-명세)
 - [작업내역](#작업내역)
 
 ## 기술 스택과 실행 방법
@@ -55,6 +57,38 @@
 |---|---|---|
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | 엔티티를 그대로 JSON 으로 반환 | 글 ↔ 댓글 순환 참조로 직렬화가 끝나지 않음 (`Document nesting depth (501) exceeds the maximum allowed`) |
 
+## 패키지 구조
+
+```
+com.back
+├─ BackApplication
+├─ domain
+│  └─ post
+│     ├─ post
+│     │  ├─ controller   ApiV1PostController
+│     │  ├─ entity       Post
+│     │  ├─ repository   PostRepository
+│     │  └─ service      PostService
+│     └─ postComment
+│        └─ entity       PostComment
+└─ global
+   ├─ initData           BaseInitData (샘플 데이터)
+   └─ jpa.entity         BaseEntity
+```
+
+도메인(`domain`)은 `기능/세부기능/계층` 순서로 나누고, 여러 도메인이 함께 쓰는 코드는 `global` 에 둡니다.
+
+## API 명세
+
+기본 경로는 `http://localhost:8080` 입니다. 단계가 진행되면서 응답 형태가 바뀌므로, 아래는 **최신 단계 기준**이며 단계별 변화는 작업내역에 적혀 있습니다.
+
+### 글
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/api/v1/posts` | 글 다건 조회 |
+| GET | `/api/v1/posts/{id}` | 글 단건 조회 |
+
 ## 작업내역
 
 ### 0부. 저장소 준비 (001)
@@ -81,6 +115,7 @@
 | [`010`](https://github.com/tbafe26/REST4/commit/010) | @JsonIgnore 로 순환 참조 해결 | @JsonIgnore |
 | [`011`](https://github.com/tbafe26/REST4/commit/011) | @RestController 로 통합 | @RestController |
 | [`012`](https://github.com/tbafe26/REST4/commit/012) | 클래스 레벨 @RequestMapping 으로 공통 경로 분리 | @RequestMapping |
+| [`013`](https://github.com/tbafe26/REST4/commit/013) | 글 단건조회 GET /api/v1/posts/{id} | @PathVariable |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -232,3 +267,19 @@ public class ApiV1PostController {
 ```
 
 **확인** `./gradlew test` 통과. 요청 경로(`GET /api/v1/posts`)는 그대로입니다.
+
+#### 013 글 단건조회
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/013) · [변경 내용](https://github.com/tbafe26/REST4/commit/013)
+
+**무엇을** `GET /api/v1/posts/{id}` 를 추가했습니다. `@PathVariable` 로 id 를 받아 `postService.findById(id)` 결과를 반환합니다. README 에 "패키지 구조", "API 명세" 섹션도 만들었습니다.
+
+**왜** 목록만으로는 특정 글 하나를 가져올 수 없습니다. 경로의 `{id}` 를 메서드 인자로 받는 것이 REST 에서 리소스 하나를 지정하는 기본 방식입니다. (지금은 없는 id 를 요청하면 `Optional.get()` 이 예외를 내는데, 예외 처리는 이후 단계에서 다룹니다.)
+
+```java
+@GetMapping("/{id}")
+public Post getItem(@PathVariable int id) {
+    return postService.findById(id).get();
+}
+```
+
+**확인** `curl http://localhost:8080/api/v1/posts/1` 이 1번 글과 댓글 3개를 반환합니다.
