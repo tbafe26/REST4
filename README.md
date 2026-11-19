@@ -152,6 +152,7 @@ com.back
 | [`042`](https://github.com/tbafe26/REST4/commit/042) | 지역 변수 제거, 인라인 생성 | 가독성 정리 |
 | [`043`](https://github.com/tbafe26/REST4/commit/043) | 작성 성공 resultCode `201-1` | 201 Created, resultCode ≠ HTTP 상태 |
 | [`044`](https://github.com/tbafe26/REST4/commit/044) | ResponseEntity + HttpStatus.CREATED | HTTP 상태 코드 직접 지정 |
+| [`045`](https://github.com/tbafe26/REST4/commit/045) | ResponseEntity 되돌리기 | 비용 대비 효과 판단 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -703,3 +704,13 @@ return new ResponseEntity<>(new RsData<>("201-1", ...), HttpStatus.CREATED);
 ```
 
 **확인** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다.
+
+
+#### 045 ResponseEntity 제거
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/045) · [변경 내용](https://github.com/tbafe26/REST4/commit/045)
+
+**무엇을** 글 작성을 다시 `RsData<PostWriteResBody>` 를 반환하도록 되돌렸습니다.
+
+**왜** 오직 상태 코드를 바꾸기 위해 모든 액션에 `ResponseEntity` 를 두르는 것은 비용 대비 효과가 낮습니다. 이미 `resultCode` 앞자리(`201`)에 원하는 상태 코드가 들어 있으니, 이를 보고 **한 곳에서 자동으로** 상태 코드를 바꾸는 방법을 다음 단계에서 적용합니다. (지금은 다시 200 으로 응답합니다.)
+
+**확인** 반환 타입이 다시 `RsData<PostWriteResBody>` 입니다.
