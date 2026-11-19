@@ -144,6 +144,7 @@ com.back
 | [`034`](https://github.com/tbafe26/REST4/commit/034) | 댓글 삭제 RsData<PostCommentDto> | raw 타입 지양 |
 | [`035`](https://github.com/tbafe26/REST4/commit/035) | 삭제 응답 RsData<Void>, data 없는 생성자 | Void 타입 인자 |
 | [`036`](https://github.com/tbafe26/REST4/commit/036) | 글/댓글 삭제 → `DELETE /{id}` | HTTP 메서드의 의미 |
+| [`037`](https://github.com/tbafe26/REST4/commit/037) | 글 작성 `POST /api/v1/posts`, JSON 본문 + 검증 | @RequestBody, @Valid |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -598,3 +599,22 @@ public RsData(String resultCode, String msg) {
 **왜** REST 에서는 **주소(URL)는 리소스**를, **HTTP 메서드는 행위**를 나타냅니다. GET 은 조회용이라 브라우저 미리 불러오기, 크롤러, 캐시 등에 의해 의도치 않게 호출될 수 있어 상태를 바꾸는 요청에 쓰면 위험합니다.
 
 **확인** `curl -X DELETE http://localhost:8080/api/v1/posts/1/comments/1`
+
+
+#### 037 글 작성 API — POST 와 JSON 요청 본문
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/037) · [변경 내용](https://github.com/tbafe26/REST4/commit/037)
+
+**무엇을** `POST /api/v1/posts` 를 추가했습니다. 요청 본문은 JSON(`{"title": "...", "content": "..."}`) 이며 컨트롤러 안의 record `PostWriteForm` 으로 받습니다. `@NotBlank`, `@Size` 로 검증합니다.
+
+**왜** 데이터를 새로 만드는 요청은 POST 를 쓰고, REST API 에서는 폼 파라미터 대신 **JSON 본문**으로 주고받는 것이 일반적입니다. `@RequestBody` 가 JSON 을 객체로 바꿔 주고 `@Valid` 가 제약 조건을 검사합니다.
+
+```java
+@PostMapping
+@Transactional
+public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
+    Post post = postService.write(form.title, form.content);
+    return new RsData<>("200-1", "%d번 글이 작성되었습니다.".formatted(post.getId()), new PostDto(post));
+}
+```
+
+**확인** `curl -X POST http://localhost:8080/api/v1/posts -H "Content-Type: application/json" -d '{"title":"제목","content":"내용"}'`
