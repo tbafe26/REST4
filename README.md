@@ -1436,6 +1436,7 @@ registry.addMapping("/api/**")
 | [`112`](https://github.com/tbafe26/REST4/commit/112) | 🟢 `@RequestParam(defaultValue = "0")` | 누락과 잘못된 값을 한 경로로 |
 | [`113`](https://github.com/tbafe26/REST4/commit/113) | 🔴 샘플 회원 6명(system, admin, user1~4) 기대 | 샘플 데이터도 테스트로 고정 |
 | [`114`](https://github.com/tbafe26/REST4/commit/114) | 🟢 BaseInitData 에 회원 생성(work1) 추가, 글/댓글은 work2 | 초기 데이터 순서 |
+| [`115`](https://github.com/tbafe26/REST4/commit/115) | 🔴 글/댓글 응답에 authorId, authorName 기대 | 연관관계 추가 전 요구 고정 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1615,3 +1616,18 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** 글/댓글에 작성자를 붙이려면 회원이 먼저 있어야 합니다. 회원과 글의 생성 여부를 따로 판단하면, 이미 글이 있는 개발 DB 에서도 회원은 새로 만들어집니다.
 
 **확인** `./gradlew test --tests "*BaseInitDataTest"`
+
+#### 115 🔴 샘플 글/댓글의 작성자 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/115) · [변경 내용](https://github.com/tbafe26/REST4/commit/115)
+
+**무엇을** 글/댓글 응답에 작성자 정보(`authorId`, `authorName`)가 있고, 샘플 데이터의 작성자가 아래와 같아야 한다는 테스트를 추가했습니다(글 `t10`, 댓글 `t6`). 두 테스트 클래스에 `MemberService` 를 주입했습니다.
+
+| 글 | 작성자 | 댓글 | 작성자 |
+|---|---|---|---|
+| 1번 | user1 | 1번, 4번 | user1 |
+| 2번 | user2 | 2번, 5번 | user2 |
+| 3번 | user3 | 3번 | user3 |
+
+**왜** "모든 글과 댓글은 작성자를 가진다" 는 요구를 응답 기준으로 먼저 정의합니다. 회원 번호는 하드코딩하지 않고 `findByUsername` 으로 조회해 비교합니다.
+
+**확인** 두 테스트 모두 실패합니다. 글: `No value at JSON path "$.authorId"`, 댓글: `No value at JSON path "$[0].authorId"`. 아직 작성자 정보가 없습니다.

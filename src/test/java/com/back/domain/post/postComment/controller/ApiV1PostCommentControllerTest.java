@@ -1,5 +1,7 @@
 package com.back.domain.post.postComment.controller;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.domain.post.postComment.entity.PostComment;
@@ -14,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -30,6 +31,8 @@ public class ApiV1PostCommentControllerTest {
     private MockMvc mvc;
     @Autowired
     private PostService postService;
+    @Autowired
+    private MemberService memberService;
 
     @Test
     @DisplayName("댓글 단건조회")
@@ -163,5 +166,36 @@ public class ApiV1PostCommentControllerTest {
                 .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.content").value("내용"));
+    }
+
+    @Test
+    @DisplayName("샘플 댓글의 작성자")
+    void t6() throws Exception {
+        // 글 번호별 댓글 작성자 (1번 글: 댓글 1~3, 2번 글: 댓글 4~5)
+        String[][] authorUsernamesByPost = {
+                {"user1", "user2", "user3"},
+                {"user1", "user2"}
+        };
+
+        for (int i = 0; i < authorUsernamesByPost.length; i++) {
+            int postId = i + 1;
+            String[] authorUsernames = authorUsernamesByPost[i];
+
+            ResultActions resultActions = mvc
+                    .perform(
+                            get("/api/v1/posts/%d/comments".formatted(postId))
+                    )
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(authorUsernames.length));
+
+            for (int j = 0; j < authorUsernames.length; j++) {
+                Member author = memberService.findByUsername(authorUsernames[j]).get();
+
+                resultActions
+                        .andExpect(jsonPath("$[%d].authorId".formatted(j)).value(author.getId()))
+                        .andExpect(jsonPath("$[%d].authorName".formatted(j)).value(author.getName()));
+            }
+        }
     }
 }

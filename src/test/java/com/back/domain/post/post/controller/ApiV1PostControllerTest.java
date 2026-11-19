@@ -1,5 +1,7 @@
 package com.back.domain.post.post.controller;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import org.hamcrest.Matchers;
@@ -13,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,7 +30,8 @@ public class ApiV1PostControllerTest {
     private MockMvc mvc;
     @Autowired
     private PostService postService;
-
+    @Autowired
+    private MemberService memberService;
 
     @Test
     @DisplayName("글 작성")
@@ -142,7 +144,6 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.msg").value("요청 본문이 올바르지 않습니다.".stripIndent().trim()));
     }
 
-
     @Test
     @DisplayName("글 수정")
     void t2() throws Exception {
@@ -188,7 +189,6 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.msg").value("%d번 글이 삭제되었습니다.".formatted(id)));
     }
 
-
     @Test
     @DisplayName("글 단건조회")
     void t4() throws Exception {
@@ -232,7 +232,6 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.msg").value("해당 데이터가 존재하지 않습니다."));
     }
 
-
     @Test
     @DisplayName("글 다건조회")
     void t5() throws Exception {
@@ -258,6 +257,26 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].title".formatted(i)).value(post.getTitle()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
+        }
+    }
+
+    @Test
+    @DisplayName("샘플 글의 작성자")
+    void t10() throws Exception {
+        String[] authorUsernames = {"user1", "user2", "user3"}; // 1, 2, 3번 글의 작성자
+
+        for (int i = 0; i < authorUsernames.length; i++) {
+            int id = i + 1;
+            Member author = memberService.findByUsername(authorUsernames[i]).get();
+
+            mvc
+                    .perform(
+                            get("/api/v1/posts/" + id)
+                    )
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.authorId").value(author.getId()))
+                    .andExpect(jsonPath("$.authorName").value(author.getName()));
         }
     }
 }
