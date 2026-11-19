@@ -13,7 +13,19 @@
 
 ## 기술 스택과 실행 방법
 
-> 프로젝트 생성 이후 단계에서 채워집니다.
+| 구분 | 내용 |
+|---|---|
+| 언어 / 빌드 | Java 25, Gradle (Kotlin DSL, 래퍼 포함) |
+| 프레임워크 | Spring Boot 4.1.2, Spring Web MVC |
+| 편의 도구 | Lombok, Spring Boot DevTools |
+
+> 이후 단계에서 JPA, H2, 검증(validation) 등이 추가되며 이 표도 함께 갱신됩니다.
+
+실행:
+```bash
+./gradlew bootRun    # 서버 실행 (기본 포트 8080)
+./gradlew test       # 테스트 실행
+```
 
 ## 커밋 따라가는 방법
 
@@ -34,9 +46,26 @@
 
 ## 작업내역
 
-### 001 저장소 준비
+### 0부. 저장소 준비 (001)
+
+#### 001 저장소 준비
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/001) · [변경 내용](https://github.com/tbafe26/REST4/commit/001)
 
 **무엇을** README 뼈대, `.gitignore`, `.gitattributes` 를 만들었습니다.
 
 **왜** 단계마다 "무엇을 왜 바꿨는지"를 README에 쌓아 가는 학습 기록이므로 그 틀을 먼저 세웁니다. `.gitattributes` 로 `gradlew`(LF)와 `gradlew.bat`(CRLF)의 줄바꿈을 고정해 OS가 달라도 실행 스크립트가 깨지지 않게 합니다.
+
+### 1부. 프로젝트 세팅과 REST API (002 ~ 048)
+
+| 태그 | 내용 | 핵심 개념 |
+|---|---|---|
+| [`002`](https://github.com/tbafe26/REST4/commit/002) | 스프링부트 프로젝트 생성(webmvc, lombok, devtools) | Spring Initializr, Gradle 래퍼 |
+
+#### 002 스프링부트 프로젝트 생성
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
+
+**무엇을** Spring Initializr 로 만든 프로젝트를 올렸습니다. `build.gradle.kts`(webmvc, lombok, devtools), `settings.gradle.kts`, Gradle 래퍼, `BackApplication`, `application.yaml`, 컨텍스트 로딩 테스트(`BackApplicationTests`)가 들어 있습니다. `.gitignore` 에는 `build/`, `.gradle` 같은 Initializr 기본 항목을 합쳤습니다.
+
+**왜** 이후 모든 단계가 이 뼈대 위에 쌓입니다. 래퍼(`gradlew`)가 들어 있어 Gradle 을 따로 설치하지 않아도 같은 버전으로 빌드됩니다.
+
+**확인** `./gradlew test` 통과.
