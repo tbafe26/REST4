@@ -1226,6 +1226,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`092`](https://github.com/tbafe26/REST4/commit/092) | HomeController 에 @Tag, @Operation | 문서 설명 보강 |
 | [`093`](https://github.com/tbafe26/REST4/commit/093) | ApiV1PostController 에 @Tag, @Operation | 문서 설명 보강 |
 | [`094`](https://github.com/tbafe26/REST4/commit/094) | ApiV1PostCommentController 에 @Tag, @Operation | 문서 설명 보강 |
+| [`095`](https://github.com/tbafe26/REST4/commit/095) | `GET /test/fetchPosts` — 페이지가 API 를 추가 요청 | 브라우저 fetch, 추가 요청 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1339,3 +1340,11 @@ springdoc:
 
 ![@Tag, @Operation 설명이 붙은 글/댓글 API 문서](docs/images/094.png)
 
+#### 095 브라우저 fetch 실습 페이지 — 글 다건조회
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/095) · [변경 내용](https://github.com/tbafe26/REST4/commit/095)
+
+**무엇을** `HomeController` 에 `GET /test/fetchPosts` 를 추가했습니다. 이 페이지의 스크립트가 `fetch("http://localhost:8080/api/v1/posts")` 로 글 목록을 요청해 콘솔에 출력합니다.
+
+**왜** 실제 프론트엔드 앱은 HTML 을 받은 뒤 자바스크립트로 API 를 **추가 요청**합니다. 그 흐름을 가장 단순한 형태로 재현해 봅니다. 지금은 HTML 을 준 서버와 API 서버가 같습니다.
+
+**확인** http://localhost:8080/test/fetchPosts 접속 후 개발자 도구 콘솔/네트워크 탭에서 `/api/v1/posts` 요청과 응답을 확인합니다.
