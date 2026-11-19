@@ -1217,6 +1217,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 |---|---|---|
 | [`084`](https://github.com/tbafe26/REST4/commit/084) | springdoc-openapi-starter-webmvc-ui 의존성 | OpenAPI, Swagger UI |
 | [`085`](https://github.com/tbafe26/REST4/commit/085) | SpringDocConfig(@Configuration, @OpenAPIDefinition) | 문서 설정 클래스 |
+| [`086`](https://github.com/tbafe26/REST4/commit/086) | `@OpenAPIDefinition(info = @Info(...))` | 문서 메타 정보 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1237,3 +1238,15 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 **왜** 문서의 제목, 그룹 같은 설정을 모아 둘 자리를 먼저 만듭니다. 이후 단계에서 이 클래스에 설정을 채워 갑니다.
 
 **확인** 문서 화면은 이전과 같습니다.
+
+#### 086 문서 제목·버전·설명 지정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/086) · [변경 내용](https://github.com/tbafe26/REST4/commit/086)
+
+**무엇을** `@Info` 로 문서 제목(`API 서버`), 버전(`beta`), 설명(`API 서버 문서입니다.`)을 지정했습니다.
+
+**왜** 기본값(`OpenAPI definition`, `v0`) 대신 이 서버가 무엇인지 문서 첫 화면에서 알 수 있게 합니다.
+
+**확인** Swagger UI 상단에 제목과 버전, 설명이 표시됩니다.
+
+![@Info 로 지정한 제목(API 서버), 버전(beta), 설명이 표시된 문서](docs/images/086.png)
+
