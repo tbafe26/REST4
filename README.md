@@ -147,6 +147,7 @@ com.back
 | [`037`](https://github.com/tbafe26/REST4/commit/037) | 글 작성 `POST /api/v1/posts`, JSON 본문 + 검증 | @RequestBody, @Valid |
 | [`038`](https://github.com/tbafe26/REST4/commit/038) | PostWriteForm → PostWriteReqBody | 이름이 역할을 드러내게 |
 | [`039`](https://github.com/tbafe26/REST4/commit/039) | 작성 응답 data 를 List(totalCount, post) 로 | data 에 여러 값 담기 |
+| [`040`](https://github.com/tbafe26/REST4/commit/040) | List → Map(totalCount, post) | 이름 있는 응답 필드 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -640,3 +641,13 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 **왜** `RsData.data` 에는 값을 하나만 담을 수 있으므로 여러 값을 담으려면 묶어야 합니다. 가장 먼저 떠오르는 방법인 List 로 시도해 봅니다. 결과 JSON 은 `[3, {...}]` 처럼 **각 값이 무엇인지 이름이 없습니다.**
 
 **확인** `data` 가 `[4, {"id":4, ...}]` 형태의 배열로 나옵니다.
+
+
+#### 040 글 작성 응답 data 를 Map 으로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/040) · [변경 내용](https://github.com/tbafe26/REST4/commit/040)
+
+**무엇을** `data` 를 `Map.of("totalCount", totalCount, "post", new PostDto(post))` 로 바꿨습니다.
+
+**왜** Map 은 키가 있어 JSON 이 `{"totalCount": 4, "post": {...}}` 처럼 읽기 쉽습니다. 다만 키는 문자열이라 오타를 컴파일러가 잡지 못하고, 반환 타입 `Map<String, Object>` 만 보고는 어떤 키가 오는지 알 수 없습니다.
+
+**확인** `data` 가 `{"totalCount": ..., "post": {...}}` 로 나옵니다.
