@@ -149,6 +149,7 @@ com.back
 | [`039`](https://github.com/tbafe26/REST4/commit/039) | 작성 응답 data 를 List(totalCount, post) 로 | data 에 여러 값 담기 |
 | [`040`](https://github.com/tbafe26/REST4/commit/040) | List → Map(totalCount, post) | 이름 있는 응답 필드 |
 | [`041`](https://github.com/tbafe26/REST4/commit/041) | Map → 전용 record PostWriteResBody | 액션별 응답 본문 타입 |
+| [`042`](https://github.com/tbafe26/REST4/commit/042) | 지역 변수 제거, 인라인 생성 | 가독성 정리 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -666,3 +667,13 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 ```
 
 **확인** 응답 JSON 은 040 과 같습니다.
+
+
+#### 042 글 작성 응답 생성 코드 간소화
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/042) · [변경 내용](https://github.com/tbafe26/REST4/commit/042)
+
+**무엇을** `PostWriteResBody data = ...` 지역 변수를 없애고 `RsData` 생성자 안에서 바로 만들었습니다.
+
+**왜** 한 번만 쓰는 변수는 줄이고 응답 구조가 코드 모양에 그대로 드러나게 합니다. 동작은 같습니다.
+
+**확인** 응답 JSON 은 이전과 같습니다.
