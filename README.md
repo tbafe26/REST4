@@ -153,6 +153,7 @@ com.back
 | [`043`](https://github.com/tbafe26/REST4/commit/043) | 작성 성공 resultCode `201-1` | 201 Created, resultCode ≠ HTTP 상태 |
 | [`044`](https://github.com/tbafe26/REST4/commit/044) | ResponseEntity + HttpStatus.CREATED | HTTP 상태 코드 직접 지정 |
 | [`045`](https://github.com/tbafe26/REST4/commit/045) | ResponseEntity 되돌리기 | 비용 대비 효과 판단 |
+| [`046`](https://github.com/tbafe26/REST4/commit/046) | ResponseAspect(AOP), RsData.statusCode | @Around, 공통 후처리 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -714,3 +715,28 @@ return new ResponseEntity<>(new RsData<>("201-1", ...), HttpStatus.CREATED);
 **왜** 오직 상태 코드를 바꾸기 위해 모든 액션에 `ResponseEntity` 를 두르는 것은 비용 대비 효과가 낮습니다. 이미 `resultCode` 앞자리(`201`)에 원하는 상태 코드가 들어 있으니, 이를 보고 **한 곳에서 자동으로** 상태 코드를 바꾸는 방법을 다음 단계에서 적용합니다. (지금은 다시 200 으로 응답합니다.)
 
 **확인** 반환 타입이 다시 `RsData<PostWriteResBody>` 입니다.
+
+
+#### 046 ResponseAspect — resultCode 로 HTTP 상태 코드 자동 설정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/046) · [변경 내용](https://github.com/tbafe26/REST4/commit/046)
+
+**무엇을** `global/aspect/ResponseAspect` 를 추가했습니다. `@RestController` 의 매핑 메서드가 `RsData` 를 반환하면, 그 `statusCode` 로 `HttpServletResponse` 의 상태 코드를 설정합니다. `RsData` 에는 `resultCode` 앞자리를 숫자로 바꾼 `statusCode` 필드를 추가했습니다.
+
+**왜** 모든 액션에 같은 후처리(상태 코드 설정)가 필요할 때, 각 메서드를 고치는 대신 AOP 로 **한 곳에서** 처리합니다. 액션 메서드는 `RsData` 만 반환하면 됩니다.
+
+```java
+@Around("within(@RestController *) && (@annotation(GetMapping) || ... )")
+public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+    Object proceed = joinPoint.proceed();
+    if (proceed instanceof RsData<?> rsData) response.setStatus(rsData.statusCode());
+    return proceed;
+}
+```
+
+```java
+public RsData(String resultCode, String msg, T data) {
+    this(resultCode, Integer.parseInt(resultCode.split("-", 2)[0]), msg, data);
+}
+```
+
+> **확인해 볼 것** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다. 응답 JSON 에 `statusCode` 도 함께 노출되는데, 다음 단계에서 숨깁니다.
