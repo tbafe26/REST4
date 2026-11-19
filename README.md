@@ -817,6 +817,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`066`](https://github.com/tbafe26/REST4/commit/066) | 단건조회 응답을 DB 값과 대조(선택) | 검증 강도 조절 |
 | [`067`](https://github.com/tbafe26/REST4/commit/067) | 글 다건조회 테스트, 배열 각 원소 검증 | jsonPath 배열 인덱스 |
 | [`068`](https://github.com/tbafe26/REST4/commit/068) | `$.length()` 로 글 개수 검증 | 목록 길이 검증 |
+| [`069`](https://github.com/tbafe26/REST4/commit/069) | 🔴 없는 글 조회 시 404, `404-1` 기대 | 실패 시나리오 테스트 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1067,3 +1068,13 @@ for (int i = 0; i < posts.size(); i++) {
 **왜** 반복문 검증은 DB 목록 길이만큼만 돌기 때문에, 응답에 **원소가 더 많은 경우**는 잡지 못합니다. 길이를 따로 검사해 빈틈을 메웁니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 069 🔴 존재하지 않는 글 조회 → 404 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/069) · [변경 내용](https://github.com/tbafe26/REST4/commit/069)
+
+**무엇을** `t6`("글 단건조회, 404") 를 추가했습니다. 존재할 수 없는 id(`Integer.MAX_VALUE`) 로 조회하면 404, `resultCode` `404-1`, `msg` `해당 데이터가 존재하지 않습니다.` 가 와야 한다고 기대합니다.
+
+**왜** 지금 구현은 `Optional.get()` 이 예외를 던지고 그대로 끝납니다. 클라이언트가 이해할 수 있는 실패 응답을 주도록 **원하는 결과를 테스트로 먼저** 적습니다.
+
+**확인** `글 단건조회, 404` 테스트가 `NoSuchElementException: No value present` 를 감싼 `ServletException` 으로 실패합니다. 예외를 응답으로 바꿔 주는 곳이 없어 요청 처리 자체가 실패합니다.
