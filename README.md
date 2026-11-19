@@ -802,6 +802,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`051`](https://github.com/tbafe26/REST4/commit/051) | `.andDo(print())` | 테스트 중 요청/응답 확인 |
 | [`052`](https://github.com/tbafe26/REST4/commit/052) | `.andExpect(status().isCreated())` | 응답 검증 |
 | [`053`](https://github.com/tbafe26/REST4/commit/053) | `ResultActions` 로 요청/검증 분리 | 테스트 구조(요청 → 검증) |
+| [`054`](https://github.com/tbafe26/REST4/commit/054) | 글 수정 테스트(PUT, 200) | put() 요청 빌더 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -876,3 +877,13 @@ resultActions
 ```
 
 **확인** 검증 내용은 052 와 같습니다.
+
+
+#### 054 글 수정 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/054) · [변경 내용](https://github.com/tbafe26/REST4/commit/054)
+
+**무엇을** `t2`("글 수정") 를 추가했습니다. `PUT /api/v1/posts/1` 에 새 제목/내용을 보내고 상태 코드 200 을 검증합니다.
+
+**왜** 이미 만든 수정 API 도 테스트로 보호합니다. 1번 글은 샘플 데이터로 항상 존재하고, `@Transactional` 롤백 덕분에 수정해도 다른 테스트에 영향이 없습니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
