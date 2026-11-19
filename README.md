@@ -71,14 +71,19 @@ com.back
 │  └─ post
 │     ├─ post
 │     │  ├─ controller   ApiV1PostController
+│     │  ├─ dto          PostDto
 │     │  ├─ entity       Post
 │     │  ├─ repository   PostRepository
 │     │  └─ service      PostService
 │     └─ postComment
+│        ├─ controller   ApiV1PostCommentController
+│        ├─ dto          PostCommentDto
 │        └─ entity       PostComment
 └─ global
+   ├─ aspect             ResponseAspect (resultCode → HTTP 상태 코드)
    ├─ initData           BaseInitData (샘플 데이터)
-   └─ jpa.entity         BaseEntity
+   ├─ jpa.entity         BaseEntity
+   └─ rsData             RsData (공통 응답)
 ```
 
 도메인(`domain`)은 `기능/세부기능/계층` 순서로 나누고, 여러 도메인이 함께 쓰는 코드는 `global` 에 둡니다.
@@ -87,12 +92,36 @@ com.back
 
 기본 경로는 `http://localhost:8080` 입니다. 단계가 진행되면서 응답 형태가 바뀌므로, 아래는 **최신 단계 기준**이며 단계별 변화는 작업내역에 적혀 있습니다.
 
-### 글
+### 글 `/api/v1/posts`
 
-| 메서드 | 경로 | 설명 |
-|---|---|---|
-| GET | `/api/v1/posts` | 글 다건 조회 |
-| GET | `/api/v1/posts/{id}` | 글 단건 조회 |
+| 메서드 | 경로 | 요청 본문 | 성공 응답 |
+|---|---|---|---|
+| GET | `/api/v1/posts` | - | 200, `PostDto[]` |
+| GET | `/api/v1/posts/{id}` | - | 200, `PostDto` |
+| POST | `/api/v1/posts` | `{"title", "content"}` | 201, `RsData<PostWriteResBody>` (`201-1`) |
+| PUT | `/api/v1/posts/{id}` | `{"title", "content"}` | 200, `RsData<Void>` (`200-1`) |
+| DELETE | `/api/v1/posts/{id}` | - | 200, `RsData<Void>` (`200-1`) |
+
+### 댓글 `/api/v1/posts/{postId}/comments`
+
+| 메서드 | 경로 | 요청 본문 | 성공 응답 |
+|---|---|---|---|
+| GET | `/api/v1/posts/{postId}/comments` | - | 200, `PostCommentDto[]` |
+| GET | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `PostCommentDto` |
+| PUT | `/api/v1/posts/{postId}/comments/{id}` | `{"content"}` | 200, `RsData<Void>` (`200-1`) |
+| DELETE | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `RsData<Void>` (`200-1`) |
+
+### 응답 규칙
+
+조회를 제외한 응답은 `RsData` 형태이며, `resultCode` 앞자리가 HTTP 상태 코드가 됩니다(`ResponseAspect`).
+
+```json
+{
+  "resultCode": "201-1",
+  "msg": "4번 글이 작성되었습니다.",
+  "data": { "totalCount": 4, "post": { "id": 4, "createDate": "...", "modifyDate": "...", "title": "제목", "content": "내용" } }
+}
+```
 
 ## 작업내역
 
@@ -155,6 +184,7 @@ com.back
 | [`045`](https://github.com/tbafe26/REST4/commit/045) | ResponseEntity 되돌리기 | 비용 대비 효과 판단 |
 | [`046`](https://github.com/tbafe26/REST4/commit/046) | ResponseAspect(AOP), RsData.statusCode | @Around, 공통 후처리 |
 | [`047`](https://github.com/tbafe26/REST4/commit/047) | 글 수정 `PUT /api/v1/posts/{id}`, statusCode @JsonIgnore | PUT, @JsonIgnore |
+| [`048`](https://github.com/tbafe26/REST4/commit/048) | 댓글 수정 `PUT /api/v1/posts/{postId}/comments/{id}` | 중첩 리소스 수정 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -751,3 +781,13 @@ public RsData(String resultCode, String msg, T data) {
 **왜** 수정은 리소스를 갱신하는 PUT 이 맞습니다. 엔티티 값을 바꾸면 트랜잭션 커밋 시 더티체킹으로 UPDATE 가 나갑니다. `statusCode` 는 HTTP 상태 줄로 이미 전달되므로 본문에 중복해서 노출하지 않습니다.
 
 **확인** `curl -X PUT http://localhost:8080/api/v1/posts/1 -H "Content-Type: application/json" -d '{"title":"제목new","content":"내용new"}'`
+
+
+#### 048 댓글 수정 API — PUT
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/048) · [변경 내용](https://github.com/tbafe26/REST4/commit/048)
+
+**무엇을** `PUT /api/v1/posts/{postId}/comments/{id}` 로 댓글을 수정합니다. 요청 본문은 `PostCommentModifyReqBody`(content), 응답은 `RsData<Void>`(`200-1`) 입니다.
+
+**왜** 글 수정과 같은 규칙(PUT, ReqBody, RsData)으로 댓글도 수정할 수 있게 해서 글/댓글 CRUD 를 완성합니다.
+
+**확인** `curl -X PUT http://localhost:8080/api/v1/posts/1/comments/1 -H "Content-Type: application/json" -d '{"content":"댓글new"}'`
