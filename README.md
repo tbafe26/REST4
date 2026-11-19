@@ -79,6 +79,7 @@
 | [`008`](https://github.com/tbafe26/REST4/commit/008) | 샘플 데이터(글 3, 댓글 5) 생성 | ApplicationRunner, 자기 주입 @Lazy |
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | [실험] 글 다건조회 API, 엔티티 순환 참조로 JSON 무한 중첩 | Jackson 직렬화, 순환 참조 |
 | [`010`](https://github.com/tbafe26/REST4/commit/010) | @JsonIgnore 로 순환 참조 해결 | @JsonIgnore |
+| [`011`](https://github.com/tbafe26/REST4/commit/011) | @RestController 로 통합 | @RestController |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -198,3 +199,17 @@ private Post post;
 ```
 
 **확인** `curl http://localhost:8080/api/v1/posts` 가 글 3개를 각 댓글 목록과 함께 정상 JSON 으로 반환합니다.
+
+#### 011 @RestController
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/011) · [변경 내용](https://github.com/tbafe26/REST4/commit/011)
+
+**무엇을** `@Controller` + 메서드의 `@ResponseBody` 를 `@RestController` 하나로 바꿨습니다.
+
+**왜** REST API 컨트롤러는 모든 메서드가 뷰 이름이 아니라 데이터를 응답 본문(JSON)으로 돌려줍니다. `@RestController` 는 `@Controller` + `@ResponseBody` 를 합친 것이라 메서드마다 `@ResponseBody` 를 반복하지 않아도 됩니다.
+
+```java
+@RestController // @Controller + @ResponseBody
+public class ApiV1PostController { ... }
+```
+
+**확인** `curl http://localhost:8080/api/v1/posts` 응답이 이전과 같습니다.
