@@ -1425,6 +1425,7 @@ registry.addMapping("/api/**")
 | [`101`](https://github.com/tbafe26/REST4/commit/101) | 🔴 `POST /api/v1/members/join` 성공 테스트(201-1) | 테스트 먼저 작성 |
 | [`102`](https://github.com/tbafe26/REST4/commit/102) | 🟢 회원가입 구현, MemberJoinReqBody 제약 | @Valid, RsData<Void> |
 | [`103`](https://github.com/tbafe26/REST4/commit/103) | 🔴 username 중복 시 409, `409-1` 기대 | 실패 시나리오 먼저 |
+| [`104`](https://github.com/tbafe26/REST4/commit/104) | 🟢 중복 검사 + MemberDuplicateUsernameException → 409-1 | 의미 있는 예외 클래스, 예외 핸들러 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1472,3 +1473,18 @@ public RsData<Void> join(@RequestBody @Valid MemberJoinReqBody reqBody) {
 **왜** 지금은 중복 검사를 하지 않아 두 번째 저장이 DB 유니크 제약에 걸립니다. 클라이언트가 이해할 수 있는 응답을 원하는 결과로 먼저 정의합니다. 409 는 "요청이 현재 리소스 상태와 충돌한다" 는 뜻으로 중복 가입에 맞는 코드입니다.
 
 **확인** `회원가입, 중복된 username` 테스트가 `DataIntegrityViolationException`(Unique index or primary key violation) 으로 실패합니다. 애플리케이션이 중복을 검사하지 않아 DB 유니크 제약까지 가서 터집니다.
+
+#### 104 🟢 MemberDuplicateUsernameException 으로 중복 가입 처리
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/104) · [변경 내용](https://github.com/tbafe26/REST4/commit/104)
+
+**무엇을** `MemberService.join` 이 저장 전에 `findByUsername` 으로 중복을 검사하고, 이미 있으면 `MemberDuplicateUsernameException` 을 던집니다. `GlobalExceptionHandler` 는 이 예외를 409, `409-1`, 예외 메시지로 응답합니다.
+
+```java
+if (memberRepository.findByUsername(username).isPresent()) {
+    throw new MemberDuplicateUsernameException(username);
+}
+```
+
+**왜** `IllegalArgumentException` 같은 범용 예외를 쓰면 "무엇이 잘못됐는지" 가 드러나지 않고, 핸들러에서 다른 상황과 구분하기도 어렵습니다. 상황에 맞는 예외 클래스를 두면 코드가 의도를 설명하고, 예외 → 응답 매핑을 정확하게 할 수 있습니다. 메시지는 예외가 만들어질 때 정해지므로 핸들러는 `ex.getMessage()` 만 쓰면 됩니다.
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
