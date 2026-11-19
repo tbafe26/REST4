@@ -818,6 +818,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`067`](https://github.com/tbafe26/REST4/commit/067) | 글 다건조회 테스트, 배열 각 원소 검증 | jsonPath 배열 인덱스 |
 | [`068`](https://github.com/tbafe26/REST4/commit/068) | `$.length()` 로 글 개수 검증 | 목록 길이 검증 |
 | [`069`](https://github.com/tbafe26/REST4/commit/069) | 🔴 없는 글 조회 시 404, `404-1` 기대 | 실패 시나리오 테스트 |
+| [`070`](https://github.com/tbafe26/REST4/commit/070) | 🟢 GlobalExceptionHandler 로 NoSuchElementException 처리 | @ControllerAdvice, @ExceptionHandler |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1078,3 +1079,24 @@ for (int i = 0; i < posts.size(); i++) {
 **왜** 지금 구현은 `Optional.get()` 이 예외를 던지고 그대로 끝납니다. 클라이언트가 이해할 수 있는 실패 응답을 주도록 **원하는 결과를 테스트로 먼저** 적습니다.
 
 **확인** `글 단건조회, 404` 테스트가 `NoSuchElementException: No value present` 를 감싼 `ServletException` 으로 실패합니다. 예외를 응답으로 바꿔 주는 곳이 없어 요청 처리 자체가 실패합니다.
+
+
+#### 070 🟢 전역 예외 핸들러 — @ControllerAdvice + @ResponseBody
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/070) · [변경 내용](https://github.com/tbafe26/REST4/commit/070)
+
+**무엇을** `global/globalExceptionHandler/GlobalExceptionHandler` 를 추가했습니다. 어느 컨트롤러에서든 `NoSuchElementException` 이 나면 `RsData("404-1", "해당 데이터가 존재하지 않습니다.")` 를 JSON 으로 응답합니다.
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseBody
+    public RsData<Void> handle() {
+        return new RsData<>("404-1", "해당 데이터가 존재하지 않습니다.");
+    }
+}
+```
+
+**왜** 모든 액션에 try-catch 를 넣는 대신, 예외 → 응답 변환을 **한 곳에** 모읍니다. `Optional.get()` 이 던지는 `NoSuchElementException` 은 "데이터가 없다" 는 뜻이므로 404 로 보냅니다.
+
+> **확인해 볼 것** 응답 본문은 `404-1` 이 되지만, 이 메서드는 `ResponseAspect` 대상(컨트롤러 매핑 메서드)이 아니라서 HTTP 상태 코드가 404 로 바뀌지 않습니다. 다음 단계에서 상태 코드를 직접 지정합니다.
