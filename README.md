@@ -806,6 +806,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`055`](https://github.com/tbafe26/REST4/commit/055) | ResponseAspect 포인트컷을 RsData 반환 메서드로 한정 | 포인트컷, 테스트가 리팩터링의 안전망 |
 | [`056`](https://github.com/tbafe26/REST4/commit/056) | `handler().handlerType/methodName` 검증 | 요청 매핑 검증 |
 | [`057`](https://github.com/tbafe26/REST4/commit/057) | 최신 글·전체 글 수를 DB 에서 조회해 응답과 대조 | jsonPath, 쿼리 메서드 findFirstByOrderByIdDesc |
+| [`058`](https://github.com/tbafe26/REST4/commit/058) | data.post 의 모든 필드 검증 | 응답 스펙을 테스트로 고정 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -937,5 +938,15 @@ resultActions
         .andExpect(jsonPath("$.data.totalCount").value(totalCount))
         .andExpect(jsonPath("$.data.post.id").value(post.getId()));
 ```
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 058 응답 JSON 의 모든 필드 검증
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/058) · [변경 내용](https://github.com/tbafe26/REST4/commit/058)
+
+**무엇을** `data.post` 의 `createDate`, `modifyDate`, `title`, `content` 까지 검증합니다. 날짜는 DB 값과 응답의 정밀도가 다를 수 있어 앞 20자리만 `Matchers.startsWith` 로 비교합니다.
+
+**왜** 응답에 담긴 **모든 필드**를 테스트해야 클라이언트에게 약속한 응답 형태(스펙)가 바뀌었을 때 바로 알 수 있습니다. 테스트가 곧 살아 있는 API 문서가 됩니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
