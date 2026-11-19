@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @ControllerAdvice
 @RequiredArgsConstructor
@@ -69,6 +70,17 @@ public class GlobalExceptionHandler {
                         ex.getMessage()
                 ),
                 CONFLICT
+        );
+    }
+
+    @ExceptionHandler(UnauthenticatedException.class)
+    public ResponseEntity<RsData<Void>> handle(UnauthenticatedException ex) {
+        return new ResponseEntity<>(
+                new RsData<>(
+                        "401-1",
+                        ex.getMessage()
+                ),
+                UNAUTHORIZED
         );
     }
 }

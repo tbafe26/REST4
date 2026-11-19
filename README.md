@@ -1431,6 +1431,7 @@ registry.addMapping("/api/**")
 | [`107`](https://github.com/tbafe26/REST4/commit/107) | 🔴 `GET /api/v1/members/me?actorId=` 테스트, password 미노출 | 행위자(actorId), 민감 정보 비노출 |
 | [`108`](https://github.com/tbafe26/REST4/commit/108) | 🟢 `GET /me`, MemberDto(password 없음) | @RequestParam, 응답 DTO 로 민감 정보 차단 |
 | [`109`](https://github.com/tbafe26/REST4/commit/109) | 🔴 없는 회원 번호면 401, `401-1` 기대 | 인증 실패(401) |
+| [`110`](https://github.com/tbafe26/REST4/commit/110) | 🟢 UnauthenticatedException → 401-1 | orElseThrow, 인증 예외 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1553,3 +1554,18 @@ public MemberDto me(@RequestParam int actorId) {
 **왜** 지금은 `findById(...).get()` 이 `NoSuchElementException` 을 던져 **404** 로 응답합니다. 하지만 "행위자를 알 수 없다" 는 것은 데이터가 없는 것이 아니라 **인증이 안 된 것**이므로 401 이 맞습니다.
 
 **확인** `내 정보, 존재하지 않는 actorId` 테스트가 `Status expected:<401> but was:<404>` 로 실패합니다. `get()` 의 `NoSuchElementException` 이 404 로 처리되고 있습니다.
+
+#### 110 🟢 UnauthenticatedException 으로 401 응답
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/110) · [변경 내용](https://github.com/tbafe26/REST4/commit/110)
+
+**무엇을** `UnauthenticatedException`(메시지 `로그인 후 이용해주세요.`) 을 만들고, 내 정보에서 회원을 못 찾으면 `orElseThrow(UnauthenticatedException::new)` 로 던집니다. `GlobalExceptionHandler` 는 이를 401, `401-1` 로 응답합니다.
+
+```java
+Member actor = memberService.findById(actorId).orElseThrow(
+        UnauthenticatedException::new
+);
+```
+
+**왜** `get()` 은 값이 없을 때 `NoSuchElementException` 을 던져 404 가 됩니다. 상황에 맞는 예외를 직접 지정하면 같은 "값이 없음" 이라도 맥락에 맞는 응답(401)을 줄 수 있습니다.
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
