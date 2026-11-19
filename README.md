@@ -1216,6 +1216,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | 태그 | 내용 | 핵심 개념 |
 |---|---|---|
 | [`084`](https://github.com/tbafe26/REST4/commit/084) | springdoc-openapi-starter-webmvc-ui 의존성 | OpenAPI, Swagger UI |
+| [`085`](https://github.com/tbafe26/REST4/commit/085) | SpringDocConfig(@Configuration, @OpenAPIDefinition) | 문서 설정 클래스 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1228,3 +1229,11 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 
 ![의존성만 추가한 상태의 Swagger UI — 제목/버전은 기본값(OpenAPI definition, v0)](docs/images/084.png)
 
+#### 085 SpringDocConfig 추가
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/085) · [변경 내용](https://github.com/tbafe26/REST4/commit/085)
+
+**무엇을** `global/springDoc/SpringDocConfig` 를 만들고 `@Configuration`, `@OpenAPIDefinition` 을 붙였습니다.
+
+**왜** 문서의 제목, 그룹 같은 설정을 모아 둘 자리를 먼저 만듭니다. 이후 단계에서 이 클래스에 설정을 채워 갑니다.
+
+**확인** 문서 화면은 이전과 같습니다.
