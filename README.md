@@ -138,6 +138,7 @@ com.back
 | [`028`](https://github.com/tbafe26/REST4/commit/028) | RsData 에 data(PostCommentDto) 추가 | 부가 데이터 응답 |
 | [`029`](https://github.com/tbafe26/REST4/commit/029) | 글 삭제(GET 임시) | CascadeType.REMOVE |
 | [`030`](https://github.com/tbafe26/REST4/commit/030) | [실험] 글 삭제 응답에 RsData 재사용 | 타입이 고정된 공통 응답의 한계 |
+| [`031`](https://github.com/tbafe26/REST4/commit/031) | ForPostRsData 임시 도입 | 타입별 응답 클래스의 중복 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -520,3 +521,13 @@ public record RsData(String resultCode, String msg) { }
 **왜** 지금 `RsData.data` 의 타입은 `PostCommentDto` 로 고정되어 있습니다. 공통 응답 객체가 특정 타입에 묶여 있으면 다른 리소스에 재사용할 수 없다는 것을 확인하는 실험입니다.
 
 **확인** `./gradlew compileJava` 가 `error: incompatible types: PostDto cannot be converted to PostCommentDto` 로 **컴파일 단계에서 실패**합니다. 타입이 고정된 공통 응답 객체는 다른 리소스에 재사용할 수 없습니다.
+
+
+#### 031 글 전용 ForPostRsData 임시 도입
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/031) · [변경 내용](https://github.com/tbafe26/REST4/commit/031)
+
+**무엇을** `data` 가 `PostDto` 인 `ForPostRsData` record 를 따로 만들어 글 삭제 응답에 사용했습니다.
+
+**왜** 일단 동작하게 만드는 가장 단순한 방법입니다. 하지만 리소스가 늘 때마다 `ForXxxRsData` 가 늘어나는 구조라 오래 갈 수 없습니다.
+
+**확인** 글 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":{...}}` 형태입니다.
