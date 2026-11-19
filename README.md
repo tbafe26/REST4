@@ -362,7 +362,6 @@ public Post getItem(@PathVariable int id) {
 
 > **확인해 볼 것** `curl http://localhost:8080/api/v1/posts/1` 응답의 키가 `createDate` 에서 `createdDate` 로 바뀌고, 기존 DB 데이터는 새 컬럼(`created_date`)이 비어 있어 값이 `null` 로 나옵니다(`ddl-auto: update` 가 컬럼을 새로 추가만 하기 때문). 로그에도 `add column created_date` 가 보입니다.
 
-
 #### 015 [실험] 엔티티 필드명 변경 — title → subject, content → body
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/015) · [변경 내용](https://github.com/tbafe26/REST4/commit/015)
 
@@ -372,7 +371,6 @@ public Post getItem(@PathVariable int id) {
 
 **확인** (test 프로파일로 서버 실행 후 `curl http://localhost:8080/api/v1/posts/1`) 응답이 `{"subject":"제목 1","body":"내용 1","comments":[{"body":"댓글 1-1", ...}], ...}` 처럼 바뀌었습니다. 이름 하나를 바꾸려고 엔티티 2개와 서비스까지 고쳐야 했고, 응답 JSON 도 통째로 달라집니다.
 
-
 #### 016 엔티티 필드명 원상복구 — 응답 모양은 DTO 로 맞추기로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/016) · [변경 내용](https://github.com/tbafe26/REST4/commit/016)
 
@@ -381,7 +379,6 @@ public Post getItem(@PathVariable int id) {
 **왜** API 에서 쓰는 이름은 클라이언트와 협의하면서 언제든 바뀔 수 있습니다. 그때마다 엔티티와 DB 를 고치는 것은 비용이 너무 큽니다. 엔티티는 그대로 두고, **응답 전용 객체(DTO)** 에서 이름을 맞추는 방향으로 갑니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 다시 `createDate`, `title`, `content` 입니다.
-
 
 #### 017 [실험] PostDto 도입 — getter 가 없는 DTO
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/017) · [변경 내용](https://github.com/tbafe26/REST4/commit/017)
@@ -403,7 +400,6 @@ public class PostDto {
 
 **확인** (test 프로파일로 서버 실행 후 curl) 다건조회는 `[{},{},{}]`, 단건조회는 `{}` 가 **200** 으로 응답됩니다. 예외는 나지 않지만 Jackson 이 읽을 수 있는 속성이 없어 내용이 모두 사라집니다.
 
-
 #### 018 Jackson 빈 객체 직렬화 설정 살펴보기
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/018) · [변경 내용](https://github.com/tbafe26/REST4/commit/018)
 
@@ -419,7 +415,6 @@ public class PostDto {
 
 **확인** 설정 주석만 추가했으므로 동작 변화는 없습니다.
 
-
 #### 019 PostDto 에 @Getter 적용
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/019) · [변경 내용](https://github.com/tbafe26/REST4/commit/019)
 
@@ -428,7 +423,6 @@ public class PostDto {
 **왜** Jackson 이 값을 읽을 수 있도록 getter 를 만들어 주는 것이 정답입니다. 이제 응답 JSON 에 `id`, `createdDate`, `modifiedDate`, `subject`, `body` 가 담깁니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts` 응답에 DTO 의 다섯 필드가 모두 보입니다.
-
 
 #### 020 PostDto 를 record 로 변경
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/020) · [변경 내용](https://github.com/tbafe26/REST4/commit/020)
@@ -447,7 +441,6 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 
 **확인** 응답 JSON 은 019 와 같습니다.
 
-
 #### 021 응답 필드명은 DTO 에서만 변경
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/021) · [변경 내용](https://github.com/tbafe26/REST4/commit/021)
 
@@ -457,7 +450,6 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 
 **확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 `id, createDate, modifyDate, title, content` 입니다.
 
-
 #### 022 메서드 참조로 DTO 변환 간소화
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/022) · [변경 내용](https://github.com/tbafe26/REST4/commit/022)
 
@@ -466,7 +458,6 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 **왜** 람다가 인자를 그대로 생성자에 넘기기만 할 때는 생성자 메서드 참조로 줄여 쓸 수 있습니다. 동작은 같습니다.
 
 **확인** 응답은 이전과 같습니다.
-
 
 #### 023 댓글 다건조회·단건조회 API
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/023) · [변경 내용](https://github.com/tbafe26/REST4/commit/023)
@@ -488,7 +479,6 @@ public PostCommentDto getItem(@PathVariable int postId, @PathVariable int id) {
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/comments` 는 1번 글의 댓글 3개, `.../comments/1` 은 댓글 하나를 반환합니다.
 
-
 #### 024 [실험] 댓글 삭제 API — @Transactional 없이
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/024) · [변경 내용](https://github.com/tbafe26/REST4/commit/024)
 
@@ -497,7 +487,6 @@ public PostCommentDto getItem(@PathVariable int postId, @PathVariable int id) {
 **왜** 컬렉션에서 빼는 것만으로 DELETE 쿼리가 나가려면 엔티티가 **영속성 컨텍스트에 관리되는 상태에서 트랜잭션이 커밋**되어야 합니다. 그 조건이 없는 지금 상태에서 어떻게 되는지 확인하는 실험입니다.
 
 **확인** (test 프로파일로 서버 실행 후 curl) `GET /api/v1/posts/1/comments/1/delete` 는 `1번 댓글이 삭제되었습니다.` 를 **200** 으로 응답하지만, 이어서 `GET /api/v1/posts/1/comments` 를 보면 1번 댓글이 **그대로 남아 있습니다**. 서버 로그에도 `delete` 쿼리가 없습니다. 트랜잭션 밖에서는 컬렉션에서 빼는 것이 DB 에 반영되지 않습니다.
-
 
 #### 025 액션 메서드에 @Transactional 적용
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/025) · [변경 내용](https://github.com/tbafe26/REST4/commit/025)
@@ -514,7 +503,6 @@ public String delete(@PathVariable int postId, @PathVariable int id) { ... }
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/comments/1/delete` 후 `.../comments` 목록에서 1번 댓글이 사라집니다.
 
-
 #### 026 삭제 응답에 resultCode 와 msg 담기
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/026) · [변경 내용](https://github.com/tbafe26/REST4/commit/026)
 
@@ -523,7 +511,6 @@ public String delete(@PathVariable int postId, @PathVariable int id) { ... }
 **왜** 조회가 아닌 요청(삭제, 작성, 수정)은 "성공했는지/어떤 결과인지"를 클라이언트가 **기계적으로** 판단할 수 있어야 합니다. 사람에게 보여줄 `msg` 와, 코드로 분기할 `resultCode` 를 함께 내려줍니다.
 
 **확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 댓글이 삭제되었습니다."}` 입니다.
-
 
 #### 027 RsData 도입
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/027) · [변경 내용](https://github.com/tbafe26/REST4/commit/027)
@@ -538,7 +525,6 @@ public record RsData(String resultCode, String msg) { }
 
 **확인** 응답 JSON 은 026 과 같습니다.
 
-
 #### 028 RsData 에 data 필드 추가
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/028) · [변경 내용](https://github.com/tbafe26/REST4/commit/028)
 
@@ -547,7 +533,6 @@ public record RsData(String resultCode, String msg) { }
 **왜** `resultCode` 와 `msg` 만으로는 표현하기 어려운 부가 정보(삭제된 댓글 내용, 새로 만든 글의 id 등)를 함께 돌려주면 클라이언트가 추가 요청을 하지 않아도 됩니다.
 
 **확인** 삭제 응답에 `"data": {"id":1, ..., "content":"댓글 1-1"}` 이 포함됩니다.
-
 
 #### 029 글 삭제 API
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/029) · [변경 내용](https://github.com/tbafe26/REST4/commit/029)
@@ -558,7 +543,6 @@ public record RsData(String resultCode, String msg) { }
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/delete` 후 SQL 로그에 댓글 DELETE 들이 글 DELETE 보다 먼저 찍힙니다.
 
-
 #### 030 [실험] 글 삭제 응답에 댓글 전용 RsData 재사용
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/030) · [변경 내용](https://github.com/tbafe26/REST4/commit/030)
 
@@ -567,7 +551,6 @@ public record RsData(String resultCode, String msg) { }
 **왜** 지금 `RsData.data` 의 타입은 `PostCommentDto` 로 고정되어 있습니다. 공통 응답 객체가 특정 타입에 묶여 있으면 다른 리소스에 재사용할 수 없다는 것을 확인하는 실험입니다.
 
 **확인** `./gradlew compileJava` 가 `error: incompatible types: PostDto cannot be converted to PostCommentDto` 로 **컴파일 단계에서 실패**합니다. 타입이 고정된 공통 응답 객체는 다른 리소스에 재사용할 수 없습니다.
-
 
 #### 031 글 전용 ForPostRsData 임시 도입
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/031) · [변경 내용](https://github.com/tbafe26/REST4/commit/031)
@@ -578,7 +561,6 @@ public record RsData(String resultCode, String msg) { }
 
 **확인** 글 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":{...}}` 형태입니다.
 
-
 #### 032 ForPostRsData 제거, RsData.data 를 Object 로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/032) · [변경 내용](https://github.com/tbafe26/REST4/commit/032)
 
@@ -587,7 +569,6 @@ public record RsData(String resultCode, String msg) { }
 **왜** `Object` 로 두면 어떤 데이터든 담을 수 있어 클래스 하나로 통합됩니다. 다만 메서드 시그니처만 보고는 `data` 에 무엇이 들어있는지 알 수 없고, 꺼내 쓸 때 형변환이 필요하다는 단점이 생깁니다.
 
 **확인** 글/댓글 삭제 응답 JSON 은 이전과 같습니다.
-
 
 #### 033 RsData 에 제네릭 적용
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/033) · [변경 내용](https://github.com/tbafe26/REST4/commit/033)
@@ -602,7 +583,6 @@ public record RsData<T>(String resultCode, String msg, T data) { }
 
 > **확인해 볼 것** 댓글 삭제는 아직 raw 타입 `RsData` 로 남아 있는데도 컴파일됩니다. raw 타입은 `RsData<Object>` 처럼 동작하지만 타입 검사를 건너뛰므로 지양합니다.
 
-
 #### 034 댓글 삭제 응답 타입에도 제네릭 명시
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/034) · [변경 내용](https://github.com/tbafe26/REST4/commit/034)
 
@@ -611,7 +591,6 @@ public record RsData<T>(String resultCode, String msg, T data) { }
 **왜** raw 타입 `RsData` 는 사실상 `RsData<Object>` 처럼 동작해 제네릭을 도입한 이점(타입 검사)을 잃습니다. 모든 곳에서 타입 인자를 명시합니다.
 
 **확인** 응답 JSON 은 이전과 같습니다.
-
 
 #### 035 데이터가 필요 없는 응답은 RsData<Void>
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/035) · [변경 내용](https://github.com/tbafe26/REST4/commit/035)
@@ -628,7 +607,6 @@ public RsData(String resultCode, String msg) {
 
 **확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":null}` 입니다.
 
-
 #### 036 삭제는 DELETE 메서드로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/036) · [변경 내용](https://github.com/tbafe26/REST4/commit/036)
 
@@ -639,7 +617,6 @@ public RsData(String resultCode, String msg) {
 **왜** REST 에서는 **주소(URL)는 리소스**를, **HTTP 메서드는 행위**를 나타냅니다. GET 은 조회용이라 브라우저 미리 불러오기, 크롤러, 캐시 등에 의해 의도치 않게 호출될 수 있어 상태를 바꾸는 요청에 쓰면 위험합니다.
 
 **확인** `curl -X DELETE http://localhost:8080/api/v1/posts/1/comments/1`
-
 
 #### 037 글 작성 API — POST 와 JSON 요청 본문
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/037) · [변경 내용](https://github.com/tbafe26/REST4/commit/037)
@@ -659,7 +636,6 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 
 **확인** `curl -X POST http://localhost:8080/api/v1/posts -H "Content-Type: application/json" -d '{"title":"제목","content":"내용"}'`
 
-
 #### 038 요청 본문 record 이름을 PostWriteReqBody 로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/038) · [변경 내용](https://github.com/tbafe26/REST4/commit/038)
 
@@ -668,7 +644,6 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 **왜** REST API 에는 HTML 폼이 없습니다. 이 객체는 **요청 본문(Request Body)** 을 담는 것이므로 이름도 그 역할을 드러내게 합니다. 이후 응답 본문 전용 객체는 `...ResBody` 로 짝을 맞춥니다.
 
 **확인** 동작은 이전과 같습니다.
-
 
 #### 039 글 작성 응답에 전체 글 수 추가 — List
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/039) · [변경 내용](https://github.com/tbafe26/REST4/commit/039)
@@ -679,7 +654,6 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 
 **확인** `data` 가 `[4, {"id":4, ...}]` 형태의 배열로 나옵니다.
 
-
 #### 040 글 작성 응답 data 를 Map 으로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/040) · [변경 내용](https://github.com/tbafe26/REST4/commit/040)
 
@@ -688,7 +662,6 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 **왜** Map 은 키가 있어 JSON 이 `{"totalCount": 4, "post": {...}}` 처럼 읽기 쉽습니다. 다만 키는 문자열이라 오타를 컴파일러가 잡지 못하고, 반환 타입 `Map<String, Object>` 만 보고는 어떤 키가 오는지 알 수 없습니다.
 
 **확인** `data` 가 `{"totalCount": ..., "post": {...}}` 로 나옵니다.
-
 
 #### 041 글 작성 전용 응답 본문 record PostWriteResBody
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/041) · [변경 내용](https://github.com/tbafe26/REST4/commit/041)
@@ -703,7 +676,6 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 
 **확인** 응답 JSON 은 040 과 같습니다.
 
-
 #### 042 글 작성 응답 생성 코드 간소화
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/042) · [변경 내용](https://github.com/tbafe26/REST4/commit/042)
 
@@ -713,7 +685,6 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 
 **확인** 응답 JSON 은 이전과 같습니다.
 
-
 #### 043 글 작성 resultCode 를 201-1 로
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/043) · [변경 내용](https://github.com/tbafe26/REST4/commit/043)
 
@@ -722,7 +693,6 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 **왜** 201(Created)은 "성공했고, 그 결과 무언가가 새로 생성됐다"는 뜻으로 작성 성공에 가장 정확한 코드입니다. 그런데 `resultCode` 는 응답 본문 안의 문자열일 뿐이라 **실제 HTTP 응답 상태 코드는 여전히 200** 입니다.
 
 > **확인해 볼 것** `curl -i -X POST ...` 로 응답 헤더를 보면 상태 줄은 `200` 인데 본문의 `resultCode` 만 `201-1` 입니다.
-
 
 #### 044 ResponseEntity 로 HTTP 상태 코드 201 설정
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/044) · [변경 내용](https://github.com/tbafe26/REST4/commit/044)
@@ -737,7 +707,6 @@ return new ResponseEntity<>(new RsData<>("201-1", ...), HttpStatus.CREATED);
 
 **확인** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다.
 
-
 #### 045 ResponseEntity 제거
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/045) · [변경 내용](https://github.com/tbafe26/REST4/commit/045)
 
@@ -746,7 +715,6 @@ return new ResponseEntity<>(new RsData<>("201-1", ...), HttpStatus.CREATED);
 **왜** 오직 상태 코드를 바꾸기 위해 모든 액션에 `ResponseEntity` 를 두르는 것은 비용 대비 효과가 낮습니다. 이미 `resultCode` 앞자리(`201`)에 원하는 상태 코드가 들어 있으니, 이를 보고 **한 곳에서 자동으로** 상태 코드를 바꾸는 방법을 다음 단계에서 적용합니다. (지금은 다시 200 으로 응답합니다.)
 
 **확인** 반환 타입이 다시 `RsData<PostWriteResBody>` 입니다.
-
 
 #### 046 ResponseAspect — resultCode 로 HTTP 상태 코드 자동 설정
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/046) · [변경 내용](https://github.com/tbafe26/REST4/commit/046)
@@ -772,7 +740,6 @@ public RsData(String resultCode, String msg, T data) {
 
 > **확인해 볼 것** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다. 응답 JSON 에 `statusCode` 도 함께 노출되는데, 다음 단계에서 숨깁니다.
 
-
 #### 047 글 수정 API — PUT, statusCode 는 응답에서 숨김
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/047) · [변경 내용](https://github.com/tbafe26/REST4/commit/047)
 
@@ -782,7 +749,6 @@ public RsData(String resultCode, String msg, T data) {
 
 **확인** `curl -X PUT http://localhost:8080/api/v1/posts/1 -H "Content-Type: application/json" -d '{"title":"제목new","content":"내용new"}'`
 
-
 #### 048 댓글 수정 API — PUT
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/048) · [변경 내용](https://github.com/tbafe26/REST4/commit/048)
 
@@ -791,7 +757,6 @@ public RsData(String resultCode, String msg, T data) {
 **왜** 글 수정과 같은 규칙(PUT, ReqBody, RsData)으로 댓글도 수정할 수 있게 해서 글/댓글 CRUD 를 완성합니다.
 
 **확인** `curl -X PUT http://localhost:8080/api/v1/posts/1/comments/1 -H "Content-Type: application/json" -d '{"content":"댓글new"}'`
-
 
 ### 2부. REST API by TDD (049 ~ 083)
 
@@ -829,6 +794,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`078`](https://github.com/tbafe26/REST4/commit/078) | 댓글 다건조회 테스트, 개수·원소 검증 | 목록 검증 |
 | [`079`](https://github.com/tbafe26/REST4/commit/079) | 댓글 삭제 테스트(DELETE, 200-1) | 삭제 응답 검증 |
 | [`080`](https://github.com/tbafe26/REST4/commit/080) | 댓글 수정 테스트(PUT, 200-1) | 수정 응답 검증 |
+| [`081`](https://github.com/tbafe26/REST4/commit/081) | 🔴 댓글 작성 테스트(201-1, data 검증) | 테스트 먼저 작성 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -838,7 +804,6 @@ public RsData(String resultCode, String msg, T data) {
 **왜** 지금까지는 기능을 만든 뒤 curl 로 손수 확인했습니다. 여기서부터는 **테스트 코드로 요청을 보내고 결과를 검증**합니다. 테스트가 있으면 이후 공통 코드를 바꿀 때도 기존 기능이 깨졌는지 즉시 알 수 있습니다. 컨트롤러 테스트는 언제나 "1. 요청을 보낸다 → 2. 응답을 검증한다" 두 단계로 이루어집니다.
 
 **확인** 테스트 클래스만 생겼고 테스트 메서드는 아직 없습니다.
-
 
 #### 050 글 작성 테스트 — MockMvc 로 POST 요청 보내기
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/050) · [변경 내용](https://github.com/tbafe26/REST4/commit/050)
@@ -867,7 +832,6 @@ public class ApiV1PostControllerTest {
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 051 요청과 응답을 출력하는 andDo(print())
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/051) · [변경 내용](https://github.com/tbafe26/REST4/commit/051)
 
@@ -877,7 +841,6 @@ public class ApiV1PostControllerTest {
 
 **확인** 테스트 실행 로그에 `MockHttpServletResponse: Status = ..., Body = ...` 가 출력됩니다.
 
-
 #### 052 응답 상태 코드 201 검증
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/052) · [변경 내용](https://github.com/tbafe26/REST4/commit/052)
 
@@ -886,7 +849,6 @@ public class ApiV1PostControllerTest {
 **왜** 출력만으로는 사람이 매번 눈으로 확인해야 합니다. 기대값을 코드로 적어 두면 테스트가 자동으로 성공/실패를 판정합니다. 201 은 `ResponseAspect` 가 `resultCode` `201-1` 을 보고 설정한 값입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 053 요청과 검증 단계를 ResultActions 로 분리
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/053) · [변경 내용](https://github.com/tbafe26/REST4/commit/053)
@@ -904,7 +866,6 @@ resultActions
 
 **확인** 검증 내용은 052 와 같습니다.
 
-
 #### 054 글 수정 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/054) · [변경 내용](https://github.com/tbafe26/REST4/commit/054)
 
@@ -913,7 +874,6 @@ resultActions
 **왜** 이미 만든 수정 API 도 테스트로 보호합니다. 1번 글은 샘플 데이터로 항상 존재하고, `@Transactional` 롤백 덕분에 수정해도 다른 테스트에 영향이 없습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 055 ResponseAspect 적용 범위 개선
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/055) · [변경 내용](https://github.com/tbafe26/REST4/commit/055)
@@ -932,7 +892,6 @@ resultActions
 
 **확인** `./gradlew test` — 글 작성(201), 글 수정(200) 테스트가 그대로 통과해야 합니다.
 
-
 #### 056 요청을 처리한 컨트롤러와 메서드 검증
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/056) · [변경 내용](https://github.com/tbafe26/REST4/commit/056)
 
@@ -941,7 +900,6 @@ resultActions
 **왜** 상태 코드만 맞아도 엉뚱한 메서드가 요청을 처리했을 수 있습니다. 의도한 컨트롤러의 의도한 액션이 실행됐는지까지 확인합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 057 글 작성 응답을 DB 데이터와 대조
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/057) · [변경 내용](https://github.com/tbafe26/REST4/commit/057)
@@ -963,7 +921,6 @@ resultActions
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 058 응답 JSON 의 모든 필드 검증
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/058) · [변경 내용](https://github.com/tbafe26/REST4/commit/058)
 
@@ -972,7 +929,6 @@ resultActions
 **왜** 응답에 담긴 **모든 필드**를 테스트해야 클라이언트에게 약속한 응답 형태(스펙)가 바뀌었을 때 바로 알 수 있습니다. 테스트가 곧 살아 있는 API 문서가 됩니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 059 🔴 요구사항 변경(totalCount 제거)을 테스트에 먼저 반영
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/059) · [변경 내용](https://github.com/tbafe26/REST4/commit/059)
@@ -983,7 +939,6 @@ resultActions
 
 **확인** `글 작성` 테스트가 `No value at JSON path "$.data.id"` 로 실패합니다. 구현은 아직 `data.totalCount`, `data.post` 구조로 응답하기 때문입니다.
 
-
 #### 060 🟢 글 작성 응답을 RsData<PostDto> 로 변경
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/060) · [변경 내용](https://github.com/tbafe26/REST4/commit/060)
 
@@ -992,7 +947,6 @@ resultActions
 **왜** 059 에서 바꾼 테스트를 통과시키는 최소한의 구현입니다. 테스트가 통과하면 요구 변경이 반영된 것입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 061 글 수정 테스트 보강
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/061) · [변경 내용](https://github.com/tbafe26/REST4/commit/061)
@@ -1003,7 +957,6 @@ resultActions
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 062 글 수정 결과가 DB 에 반영됐는지까지 확인
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/062) · [변경 내용](https://github.com/tbafe26/REST4/commit/062)
 
@@ -1012,7 +965,6 @@ resultActions
 **왜** 응답이 "수정되었습니다" 라고 해도 실제 저장이 안 됐을 수 있습니다. DB 까지 확인하는 것은 더 확실하지만, 컨트롤러 테스트의 필수 범위는 아닙니다(선택 사항).
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 063 컨트롤러 테스트에서 과한 DB 검증 제거
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/063) · [변경 내용](https://github.com/tbafe26/REST4/commit/063)
@@ -1023,7 +975,6 @@ resultActions
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 064 글 삭제 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/064) · [변경 내용](https://github.com/tbafe26/REST4/commit/064)
 
@@ -1032,7 +983,6 @@ resultActions
 **왜** 글 CRUD 중 삭제도 테스트로 보호합니다. 롤백되므로 1번 글을 지워도 다른 테스트에 영향이 없습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 065 글 단건조회 테스트 — 응답 필드 형태 검증
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/065) · [변경 내용](https://github.com/tbafe26/REST4/commit/065)
@@ -1043,7 +993,6 @@ resultActions
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 066 글 단건조회 테스트 — 실제 DB 값과 대조
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/066) · [변경 내용](https://github.com/tbafe26/REST4/commit/066)
 
@@ -1052,7 +1001,6 @@ resultActions
 **왜** 형태만 맞고 엉뚱한 글이 올 수도 있습니다. DB 값과 대조하면 더 확실하지만, 이 정도까지 하는 것은 **선택**입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 067 글 다건조회 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/067) · [변경 내용](https://github.com/tbafe26/REST4/commit/067)
@@ -1070,7 +1018,6 @@ for (int i = 0; i < posts.size(); i++) {
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 068 글 다건조회 개수 검증
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/068) · [변경 내용](https://github.com/tbafe26/REST4/commit/068)
 
@@ -1080,7 +1027,6 @@ for (int i = 0; i < posts.size(); i++) {
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 069 🔴 존재하지 않는 글 조회 → 404 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/069) · [변경 내용](https://github.com/tbafe26/REST4/commit/069)
 
@@ -1089,7 +1035,6 @@ for (int i = 0; i < posts.size(); i++) {
 **왜** 지금 구현은 `Optional.get()` 이 예외를 던지고 그대로 끝납니다. 클라이언트가 이해할 수 있는 실패 응답을 주도록 **원하는 결과를 테스트로 먼저** 적습니다.
 
 **확인** `글 단건조회, 404` 테스트가 `NoSuchElementException: No value present` 를 감싼 `ServletException` 으로 실패합니다. 예외를 응답으로 바꿔 주는 곳이 없어 요청 처리 자체가 실패합니다.
-
 
 #### 070 🟢 전역 예외 핸들러 — @ControllerAdvice + @ResponseBody
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/070) · [변경 내용](https://github.com/tbafe26/REST4/commit/070)
@@ -1111,7 +1056,6 @@ public class GlobalExceptionHandler {
 
 > **확인해 볼 것** 응답 본문은 `404-1` 이 되지만, 이 메서드는 `ResponseAspect` 대상(컨트롤러 매핑 메서드)이 아니라서 HTTP 상태 코드가 404 로 바뀌지 않습니다. 다음 단계에서 상태 코드를 직접 지정합니다.
 
-
 #### 071 @RestControllerAdvice 와 @ResponseStatus(NOT_FOUND)
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/071) · [변경 내용](https://github.com/tbafe26/REST4/commit/071)
 
@@ -1120,7 +1064,6 @@ public class GlobalExceptionHandler {
 **왜** `@RestControllerAdvice = @ControllerAdvice + @ResponseBody` 입니다(`@RestController` 와 같은 관계). 예외 핸들러는 `ResponseAspect` 가 상태 코드를 바꿔 주지 않으므로 `@ResponseStatus` 로 직접 지정합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"` — 404 테스트(`t6`)가 통과해야 합니다.
-
 
 #### 072 ResponseEntity 로 예외 응답 상태 코드 지정
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/072) · [변경 내용](https://github.com/tbafe26/REST4/commit/072)
@@ -1137,7 +1080,6 @@ public ResponseEntity<RsData<Void>> handle() {
 ```
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 073 제목 없이 글 작성 → 400
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/073) · [변경 내용](https://github.com/tbafe26/REST4/commit/073)
@@ -1157,7 +1099,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 074 내용 없이 글 작성 → 400
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/074) · [변경 내용](https://github.com/tbafe26/REST4/commit/074)
 
@@ -1166,7 +1107,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 073 의 핸들러가 다른 필드에도 같은 규칙으로 동작하는지 확인합니다. 구현 변경은 없습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
-
 
 #### 075 잘못된 JSON 으로 글 작성 → 400
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/075) · [변경 내용](https://github.com/tbafe26/REST4/commit/075)
@@ -1177,7 +1117,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
 
-
 #### 076 댓글 컨트롤러 테스트 준비
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/076) · [변경 내용](https://github.com/tbafe26/REST4/commit/076)
 
@@ -1186,7 +1125,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 댓글 API 도 같은 방식(요청 → 검증)으로 테스트하기 위한 준비입니다. 댓글은 글을 통해 조회하므로 `PostService` 가 필요합니다.
 
 **확인** 테스트 메서드는 아직 없습니다.
-
 
 #### 077 댓글 단건조회 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/077) · [변경 내용](https://github.com/tbafe26/REST4/commit/077)
@@ -1197,7 +1135,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
 
-
 #### 078 댓글 다건조회 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/078) · [변경 내용](https://github.com/tbafe26/REST4/commit/078)
 
@@ -1206,7 +1143,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 글 다건조회 테스트에서 배운 대로 길이와 원소를 모두 검증합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
-
 
 #### 079 댓글 삭제 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/079) · [변경 내용](https://github.com/tbafe26/REST4/commit/079)
@@ -1217,7 +1153,6 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
 
-
 #### 080 댓글 수정 테스트
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/080) · [변경 내용](https://github.com/tbafe26/REST4/commit/080)
 
@@ -1226,3 +1161,15 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 댓글 수정 API 를 테스트로 보호합니다. 이로써 댓글 작성을 제외한 댓글 API 가 모두 테스트로 덮였습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+#### 081 🔴 댓글 작성 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/081) · [변경 내용](https://github.com/tbafe26/REST4/commit/081)
+
+**무엇을** 아직 없는 댓글 작성 기능에 대한 테스트 `t5`("댓글 작성") 를 먼저 작성했습니다. `POST /api/v1/posts/1/comments` 에 `{"content": "내용"}` 을 보내면 201, `201-1`, `N번 댓글이 작성되었습니다.`, `data` 에 새 댓글 정보가 와야 합니다. 기대값은 요청 후 글의 마지막 댓글(`getComments().getLast()`)에서 꺼냅니다.
+
+**왜** 이번에는 기능보다 **테스트를 먼저** 만듭니다. 원하는 동작을 테스트로 명확히 적어 두고, 그 테스트를 통과시키는 것을 구현의 목표로 삼습니다.
+
+**확인** `댓글 작성` 테스트가 `No handler` 로 실패합니다. 아직 `POST` 를 처리할 액션이 없습니다.
+
+![🔴 댓글 작성 테스트만 실패한 테스트 리포트 (5개 중 1개 실패)](docs/images/081.png)
+
