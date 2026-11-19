@@ -1434,6 +1434,7 @@ registry.addMapping("/api/**")
 | [`110`](https://github.com/tbafe26/REST4/commit/110) | 🟢 UnauthenticatedException → 401-1 | orElseThrow, 인증 예외 |
 | [`111`](https://github.com/tbafe26/REST4/commit/111) | 🔴 actorId 누락 시에도 401 기대 | 필수 파라미터 누락 |
 | [`112`](https://github.com/tbafe26/REST4/commit/112) | 🟢 `@RequestParam(defaultValue = "0")` | 누락과 잘못된 값을 한 경로로 |
+| [`113`](https://github.com/tbafe26/REST4/commit/113) | 🔴 샘플 회원 6명(system, admin, user1~4) 기대 | 샘플 데이터도 테스트로 고정 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1589,3 +1590,18 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** 파라미터가 없으면 0 이 들어오고, 0 번 회원은 존재하지 않으므로 110 에서 만든 `UnauthenticatedException` 경로를 그대로 탑니다. 누락과 잘못된 값을 **하나의 처리 경로**로 모아 별도 예외 핸들러 없이 401 을 줍니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 113 🔴 샘플 회원 6명 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/113) · [변경 내용](https://github.com/tbafe26/REST4/commit/113)
+
+**무엇을** `BaseInitDataTest` 를 만들어, 애플리케이션이 뜨면 회원이 정확히 6명 있고 각 username/이름/비밀번호가 아래와 같아야 한다고 정의했습니다. 조회를 위해 `MemberService.count()`, `findByUsername()` 을 추가했습니다.
+
+| username | 이름 | 비밀번호 |
+|---|---|---|
+| system | 시스템 | 12345678 |
+| admin | 관리자 | 12345678 |
+| user1 ~ user4 | 유저1 ~ 유저4 | 12345678 |
+
+**왜** 이후 작성자/권한 기능의 테스트는 이 샘플 회원들을 행위자로 씁니다. 샘플 데이터가 테스트의 전제이므로 그 자체도 테스트로 고정해 둡니다.
+
+**확인** `샘플 회원 6명이 생성되어 있다` 테스트가 `expected: 6L but was: 0L` 로 실패합니다. 아직 샘플 회원을 만들지 않습니다.
