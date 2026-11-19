@@ -808,6 +808,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`057`](https://github.com/tbafe26/REST4/commit/057) | 최신 글·전체 글 수를 DB 에서 조회해 응답과 대조 | jsonPath, 쿼리 메서드 findFirstByOrderByIdDesc |
 | [`058`](https://github.com/tbafe26/REST4/commit/058) | data.post 의 모든 필드 검증 | 응답 스펙을 테스트로 고정 |
 | [`059`](https://github.com/tbafe26/REST4/commit/059) | 🔴 작성 응답 data 를 PostDto 로 기대하도록 테스트 수정 | 요구 변경 시 테스트 먼저 |
+| [`060`](https://github.com/tbafe26/REST4/commit/060) | 🟢 PostWriteResBody 제거, `RsData<PostDto>` | Red → Green |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -961,3 +962,13 @@ resultActions
 **왜** 이미 있는 기능의 요구사항이 바뀌면 **테스트를 먼저 고쳐** 새 요구를 코드로 명시합니다. 그러면 테스트가 실패하면서 "아직 구현이 요구를 만족하지 않는다"는 것을 보여 주고, 구현을 고친 뒤 통과하는 것으로 완료를 판단할 수 있습니다.
 
 **확인** `글 작성` 테스트가 `No value at JSON path "$.data.id"` 로 실패합니다. 구현은 아직 `data.totalCount`, `data.post` 구조로 응답하기 때문입니다.
+
+
+#### 060 🟢 글 작성 응답을 RsData<PostDto> 로 변경
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/060) · [변경 내용](https://github.com/tbafe26/REST4/commit/060)
+
+**무엇을** `PostWriteResBody` 와 `totalCount` 조회를 없애고 글 작성이 `RsData<PostDto>` 를 반환하게 했습니다. 테스트에서 쓰지 않게 된 `totalCount` 변수도 지웠습니다.
+
+**왜** 059 에서 바꾼 테스트를 통과시키는 최소한의 구현입니다. 테스트가 통과하면 요구 변경이 반영된 것입니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
