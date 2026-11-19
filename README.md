@@ -132,6 +132,7 @@ com.back
 | [`023`](https://github.com/tbafe26/REST4/commit/023) | 댓글 다건/단건조회, PostCommentDto | 중첩 리소스 경로, 다중 @PathVariable |
 | [`024`](https://github.com/tbafe26/REST4/commit/024) | [실험] 댓글 삭제(GET 임시), @Transactional 없음 | 트랜잭션과 더티체킹 |
 | [`025`](https://github.com/tbafe26/REST4/commit/025) | 액션 메서드에 @Transactional / readOnly | 영속성 컨텍스트, orphanRemoval, readOnly 트랜잭션 |
+| [`026`](https://github.com/tbafe26/REST4/commit/026) | 삭제 응답을 Map(resultCode, msg) 으로 | 조회 외 응답의 결과 코드·메시지 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -460,3 +461,13 @@ public String delete(@PathVariable int postId, @PathVariable int id) { ... }
 ```
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/comments/1/delete` 후 `.../comments` 목록에서 1번 댓글이 사라집니다.
+
+
+#### 026 삭제 응답에 resultCode 와 msg 담기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/026) · [변경 내용](https://github.com/tbafe26/REST4/commit/026)
+
+**무엇을** 댓글 삭제 응답을 문자열 대신 `Map`(`resultCode: "200-1"`, `msg`) 으로 바꿨습니다. 순서가 유지되도록 `LinkedHashMap` 을 썼습니다.
+
+**왜** 조회가 아닌 요청(삭제, 작성, 수정)은 "성공했는지/어떤 결과인지"를 클라이언트가 **기계적으로** 판단할 수 있어야 합니다. 사람에게 보여줄 `msg` 와, 코드로 분기할 `resultCode` 를 함께 내려줍니다.
+
+**확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 댓글이 삭제되었습니다."}` 입니다.
