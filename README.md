@@ -154,6 +154,7 @@ com.back
 | [`044`](https://github.com/tbafe26/REST4/commit/044) | ResponseEntity + HttpStatus.CREATED | HTTP 상태 코드 직접 지정 |
 | [`045`](https://github.com/tbafe26/REST4/commit/045) | ResponseEntity 되돌리기 | 비용 대비 효과 판단 |
 | [`046`](https://github.com/tbafe26/REST4/commit/046) | ResponseAspect(AOP), RsData.statusCode | @Around, 공통 후처리 |
+| [`047`](https://github.com/tbafe26/REST4/commit/047) | 글 수정 `PUT /api/v1/posts/{id}`, statusCode @JsonIgnore | PUT, @JsonIgnore |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -740,3 +741,13 @@ public RsData(String resultCode, String msg, T data) {
 ```
 
 > **확인해 볼 것** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다. 응답 JSON 에 `statusCode` 도 함께 노출되는데, 다음 단계에서 숨깁니다.
+
+
+#### 047 글 수정 API — PUT, statusCode 는 응답에서 숨김
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/047) · [변경 내용](https://github.com/tbafe26/REST4/commit/047)
+
+**무엇을** `PUT /api/v1/posts/{id}` 로 글을 수정합니다. 요청 본문은 `PostModifyReqBody`(title, content) 이고 응답은 `RsData<Void>`(`200-1`) 입니다. `RsData.statusCode` 에는 `@JsonIgnore` 를 붙였습니다.
+
+**왜** 수정은 리소스를 갱신하는 PUT 이 맞습니다. 엔티티 값을 바꾸면 트랜잭션 커밋 시 더티체킹으로 UPDATE 가 나갑니다. `statusCode` 는 HTTP 상태 줄로 이미 전달되므로 본문에 중복해서 노출하지 않습니다.
+
+**확인** `curl -X PUT http://localhost:8080/api/v1/posts/1 -H "Content-Type: application/json" -d '{"title":"제목new","content":"내용new"}'`
