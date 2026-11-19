@@ -18,8 +18,10 @@
 | 언어 / 빌드 | Java 25, Gradle (Kotlin DSL, 래퍼 포함) |
 | 프레임워크 | Spring Boot 4.1.2, Spring Web MVC |
 | 편의 도구 | Lombok, Spring Boot DevTools |
+| 데이터 | Spring Data JPA, H2 (개발용 파일 DB / 테스트용 메모리 DB), H2 콘솔 |
+| 검증 | Bean Validation (spring-boot-starter-validation) |
 
-> 이후 단계에서 JPA, H2, 검증(validation) 등이 추가되며 이 표도 함께 갱신됩니다.
+> 이후 단계에서 의존성이 늘어나면 이 표도 함께 갱신됩니다.
 
 실행:
 ```bash
@@ -60,6 +62,7 @@
 | 태그 | 내용 | 핵심 개념 |
 |---|---|---|
 | [`002`](https://github.com/tbafe26/REST4/commit/002) | 스프링부트 프로젝트 생성(webmvc, lombok, devtools) | Spring Initializr, Gradle 래퍼 |
+| [`003`](https://github.com/tbafe26/REST4/commit/003) | JPA, H2, validation, H2 콘솔 의존성 추가 | starter 의존성 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -69,3 +72,12 @@
 **왜** 이후 모든 단계가 이 뼈대 위에 쌓입니다. 래퍼(`gradlew`)가 들어 있어 Gradle 을 따로 설치하지 않아도 같은 버전으로 빌드됩니다.
 
 **확인** `./gradlew test` 통과.
+
+#### 003 의존성 추가 (JPA, H2, validation, H2 콘솔)
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/003) · [변경 내용](https://github.com/tbafe26/REST4/commit/003)
+
+**무엇을** `build.gradle.kts` 에 `spring-boot-starter-data-jpa`, `spring-boot-starter-validation`, `spring-boot-h2console`, 런타임 `h2` 와 각각의 테스트 starter 를 추가했습니다.
+
+**왜** 글/댓글을 DB에 저장하려면 JPA 와 DB 드라이버가 필요합니다. H2 는 별도 설치 없이 파일/메모리로 동작해 학습용으로 알맞고, 검증 starter 는 이후 요청 데이터 검증에 씁니다.
+
+**확인** `./gradlew test` 통과. 아직 DB 접속 설정이 없지만 H2 임베디드 기본 설정으로 컨텍스트가 뜹니다.
