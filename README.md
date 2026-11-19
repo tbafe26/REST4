@@ -824,6 +824,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`073`](https://github.com/tbafe26/REST4/commit/073) | 제목 없이 작성 시 400, MethodArgumentNotValidException 처리 | @Valid 실패 응답 |
 | [`074`](https://github.com/tbafe26/REST4/commit/074) | 내용 없이 작성 시 400 테스트 | 같은 규칙의 실패 케이스 추가 |
 | [`075`](https://github.com/tbafe26/REST4/commit/075) | 잘못된 JSON 시 400, HttpMessageNotReadableException 처리 | 역직렬화 실패 응답 |
+| [`076`](https://github.com/tbafe26/REST4/commit/076) | ApiV1PostCommentControllerTest 설정(MockMvc, PostService) | 테스트 클래스 공통 설정 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1171,3 +1172,13 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** JSON 자체를 읽을 수 없으면 `@Valid` 검증 전에 역직렬화 단계에서 실패합니다. 이 경우도 클라이언트가 원인을 알 수 있게 우리 응답 형식으로 돌려줍니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 076 댓글 컨트롤러 테스트 준비
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/076) · [변경 내용](https://github.com/tbafe26/REST4/commit/076)
+
+**무엇을** `ApiV1PostCommentControllerTest` 에 글 테스트와 같은 설정(`@ActiveProfiles("test")`, `@SpringBootTest`, `@AutoConfigureMockMvc`, `@Transactional`)과 `MockMvc`, `PostService` 주입을 추가했습니다.
+
+**왜** 댓글 API 도 같은 방식(요청 → 검증)으로 테스트하기 위한 준비입니다. 댓글은 글을 통해 조회하므로 `PostService` 가 필요합니다.
+
+**확인** 테스트 메서드는 아직 없습니다.
