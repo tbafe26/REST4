@@ -1211,3 +1211,20 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 
 ![🟢 flush() 적용 후 댓글 테스트 5개 모두 통과](docs/images/083.png)
 
+### 3부. API 문서와 CORS (084 ~ 099)
+
+| 태그 | 내용 | 핵심 개념 |
+|---|---|---|
+| [`084`](https://github.com/tbafe26/REST4/commit/084) | springdoc-openapi-starter-webmvc-ui 의존성 | OpenAPI, Swagger UI |
+
+#### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
+
+**무엇을** `build.gradle.kts` 에 `org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0` 을 추가했습니다. README 실행 방법에 문서 주소를 적었습니다.
+
+**왜** 프론트엔드 개발자에게 API 명세를 손으로 정리해 전달하면 코드와 문서가 금방 어긋납니다. SpringDoc 은 컨트롤러 코드를 읽어 **OpenAPI 명세(JSON)** 를 자동으로 만들고, Swagger UI 로 보여 줍니다. 문서에서 바로 API 를 호출해 볼 수도 있습니다.
+
+**확인** `./gradlew bootRun` 후 http://localhost:8080/swagger-ui/index.html (명세 JSON: http://localhost:8080/v3/api-docs)
+
+![의존성만 추가한 상태의 Swagger UI — 제목/버전은 기본값(OpenAPI definition, v0)](docs/images/084.png)
+
