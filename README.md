@@ -61,6 +61,7 @@
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | getter 없는 `PostDto` 반환 | 오류 없이 빈 객체가 응답됨: 다건 `[{},{},{}]`, 단건 `{}` |
 | [`024`](https://github.com/tbafe26/REST4/commit/024) | `@Transactional` 없이 댓글 삭제 | "1번 댓글이 삭제되었습니다." 응답 후에도 댓글이 그대로 남아 있음 |
 | [`030`](https://github.com/tbafe26/REST4/commit/030) | 댓글 전용 `RsData` 로 글 삭제 응답 | 컴파일 오류: `PostDto cannot be converted to PostCommentDto` |
+| [`082`](https://github.com/tbafe26/REST4/commit/082) | `flush()` 없이 댓글 작성 후 응답 | 응답이 `0번 댓글이 작성되었습니다.`, `data.id = 0`, 날짜 `null` |
 
 ## 패키지 구조
 
@@ -795,6 +796,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`079`](https://github.com/tbafe26/REST4/commit/079) | 댓글 삭제 테스트(DELETE, 200-1) | 삭제 응답 검증 |
 | [`080`](https://github.com/tbafe26/REST4/commit/080) | 댓글 수정 테스트(PUT, 200-1) | 수정 응답 검증 |
 | [`081`](https://github.com/tbafe26/REST4/commit/081) | 🔴 댓글 작성 테스트(201-1, data 검증) | 테스트 먼저 작성 |
+| [`082`](https://github.com/tbafe26/REST4/commit/082) | [실험] 댓글 작성 구현(flush 없음) | 쓰기 지연, IDENTITY 와 INSERT 시점 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1173,3 +1175,11 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 
 ![🔴 댓글 작성 테스트만 실패한 테스트 리포트 (5개 중 1개 실패)](docs/images/081.png)
 
+#### 082 [실험] 댓글 작성 구현 — flush 없이
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/082) · [변경 내용](https://github.com/tbafe26/REST4/commit/082)
+
+**무엇을** `POST /api/v1/posts/{postId}/comments` 를 구현했습니다. 요청 본문은 `PostCommentWriteReqBody`(content), 응답은 `RsData<PostCommentDto>`(`201-1`) 입니다. `PostService.writeComment` 가 생성된 댓글을 반환하도록 바꿨습니다.
+
+**왜** 댓글은 `post.addComment()` 로 컬렉션에 추가되고 cascade 에 의해 저장됩니다. 이렇게 저장되는 엔티티는 **언제 INSERT 가 실행되는지**에 따라 응답 시점의 `id` 값이 달라질 수 있습니다. 그 결과를 확인하는 실험입니다.
+
+**확인** (test 프로파일로 서버 실행 후 `POST /api/v1/posts/1/comments`) 응답이 `{"resultCode":"201-1","msg":"0번 댓글이 작성되었습니다.","data":{"id":0,"createDate":null,"modifyDate":null,...}}` 입니다. 응답을 만드는 시점에는 아직 INSERT 가 실행되지 않아 id 와 생성일이 채워지지 않았습니다. 테스트(`댓글 작성`)도 `PostComment.getCreateDate()` 가 `null` 이라 실패합니다.
