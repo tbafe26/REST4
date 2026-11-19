@@ -80,6 +80,7 @@
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | [실험] 글 다건조회 API, 엔티티 순환 참조로 JSON 무한 중첩 | Jackson 직렬화, 순환 참조 |
 | [`010`](https://github.com/tbafe26/REST4/commit/010) | @JsonIgnore 로 순환 참조 해결 | @JsonIgnore |
 | [`011`](https://github.com/tbafe26/REST4/commit/011) | @RestController 로 통합 | @RestController |
+| [`012`](https://github.com/tbafe26/REST4/commit/012) | 클래스 레벨 @RequestMapping 으로 공통 경로 분리 | @RequestMapping |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -213,3 +214,21 @@ public class ApiV1PostController { ... }
 ```
 
 **확인** `curl http://localhost:8080/api/v1/posts` 응답이 이전과 같습니다.
+
+#### 012 클래스 레벨 @RequestMapping
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/012) · [변경 내용](https://github.com/tbafe26/REST4/commit/012)
+
+**무엇을** 공통 경로 `/api/v1/posts` 를 클래스에 `@RequestMapping` 으로 올리고, 메서드는 `@GetMapping` 만 남겼습니다.
+
+**왜** 글 관련 엔드포인트가 늘어날수록 메서드마다 `/api/v1/posts` 를 반복하게 됩니다. 공통 접두사를 클래스에 한 번만 적으면 중복이 줄고 경로를 바꿀 때 한 곳만 고치면 됩니다.
+
+```java
+@RestController
+@RequestMapping("/api/v1/posts")
+public class ApiV1PostController {
+    @GetMapping
+    public List<Post> getItems() { ... }
+}
+```
+
+**확인** `./gradlew test` 통과. 요청 경로(`GET /api/v1/posts`)는 그대로입니다.
