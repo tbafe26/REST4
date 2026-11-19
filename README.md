@@ -59,6 +59,7 @@
 | [`014`](https://github.com/tbafe26/REST4/commit/014) | 엔티티 필드명 `createDate` → `createdDate` | 응답 JSON 키가 바뀌고 기존 행의 값이 `null` 이 됨 |
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | 엔티티 필드명 `title`/`content` → `subject`/`body` | 응답 키가 `subject`, `body` 로 바뀌고, 댓글까지 키가 `body` 로 바뀜 |
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | getter 없는 `PostDto` 반환 | 오류 없이 빈 객체가 응답됨: 다건 `[{},{},{}]`, 단건 `{}` |
+| [`024`](https://github.com/tbafe26/REST4/commit/024) | `@Transactional` 없이 댓글 삭제 | "1번 댓글이 삭제되었습니다." 응답 후에도 댓글이 그대로 남아 있음 |
 
 ## 패키지 구조
 
@@ -129,6 +130,7 @@ com.back
 | [`021`](https://github.com/tbafe26/REST4/commit/021) | DTO 필드명을 createDate/modifyDate/title/content 로 | DTO 덕분에 엔티티 수정 없이 응답 변경 |
 | [`022`](https://github.com/tbafe26/REST4/commit/022) | `.map(PostDto::new)` | 생성자 메서드 참조 |
 | [`023`](https://github.com/tbafe26/REST4/commit/023) | 댓글 다건/단건조회, PostCommentDto | 중첩 리소스 경로, 다중 @PathVariable |
+| [`024`](https://github.com/tbafe26/REST4/commit/024) | [실험] 댓글 삭제(GET 임시), @Transactional 없음 | 트랜잭션과 더티체킹 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -431,3 +433,13 @@ public PostCommentDto getItem(@PathVariable int postId, @PathVariable int id) {
 ```
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/comments` 는 1번 글의 댓글 3개, `.../comments/1` 은 댓글 하나를 반환합니다.
+
+
+#### 024 [실험] 댓글 삭제 API — @Transactional 없이
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/024) · [변경 내용](https://github.com/tbafe26/REST4/commit/024)
+
+**무엇을** 댓글 삭제를 추가했습니다. 브라우저 주소창으로 바로 호출해 보기 위해 임시로 `GET /api/v1/posts/{postId}/comments/{id}/delete` 로 열었습니다. `postService.deleteComment(post, postComment)` 는 글의 댓글 목록에서 댓글을 빼기만 합니다(`orphanRemoval = true` 에 의해 DB 삭제를 기대).
+
+**왜** 컬렉션에서 빼는 것만으로 DELETE 쿼리가 나가려면 엔티티가 **영속성 컨텍스트에 관리되는 상태에서 트랜잭션이 커밋**되어야 합니다. 그 조건이 없는 지금 상태에서 어떻게 되는지 확인하는 실험입니다.
+
+**확인** (test 프로파일로 서버 실행 후 curl) `GET /api/v1/posts/1/comments/1/delete` 는 `1번 댓글이 삭제되었습니다.` 를 **200** 으로 응답하지만, 이어서 `GET /api/v1/posts/1/comments` 를 보면 1번 댓글이 **그대로 남아 있습니다**. 서버 로그에도 `delete` 쿼리가 없습니다. 트랜잭션 밖에서는 컬렉션에서 빼는 것이 DB 에 반영되지 않습니다.
