@@ -63,6 +63,13 @@ public class Post extends BaseEntity {
         }
     }
 
+    // 작성자 본인이 아니면 수정할 수 없다
+    public void checkActorCanModify(Member actor) {
+        if (author.getId() != actor.getId()) {
+            throw new AccessDeniedException();
+        }
+    }
+
     public boolean deleteComment(PostComment postComment) {
         if (postComment == null) return false;
 

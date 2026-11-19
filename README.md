@@ -1446,6 +1446,7 @@ registry.addMapping("/api/**")
 | [`122`](https://github.com/tbafe26/REST4/commit/122) | 🔴 글 삭제: 작성자 성공, 타인 403, actorId 없음 401 | 인증(401)과 인가(403)의 구분 |
 | [`123`](https://github.com/tbafe26/REST4/commit/123) | 🟢 `post.checkActorCanDelete(actor)`, AccessDeniedException → 403-1 | 권한 검사는 엔티티에, 응답 변환은 핸들러에 |
 | [`124`](https://github.com/tbafe26/REST4/commit/124) | 🔴 글 수정: 작성자 성공, 타인 403, actorId 없음 401 | 같은 권한 규칙을 수정에 |
+| [`125`](https://github.com/tbafe26/REST4/commit/125) | 🟢 `post.checkActorCanModify(actor)` | 수정 권한 검사 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1752,3 +1753,12 @@ public void checkActorCanDelete(Member actor) {
 **왜** 삭제와 마찬가지로 수정도 작성자만 할 수 있어야 합니다. 지금은 누구든 수정할 수 있어 새 테스트가 실패합니다.
 
 **확인** `글 수정, 작성자가 아닌 회원` 은 `Status expected:<403> but was:<200>`, `글 수정, actorId 없음` 은 `Status expected:<401> but was:<200>` 으로 실패합니다. 지금은 누구든 수정할 수 있습니다. 작성자 본인 테스트는 통과합니다.
+
+#### 125 🟢 작성자 외 글 수정 차단
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/125) · [변경 내용](https://github.com/tbafe26/REST4/commit/125)
+
+**무엇을** `Post.checkActorCanModify(actor)` 를 추가하고, 글 수정 액션이 `actorId` 행위자 확인(401) → 글 조회 → 수정 권한 확인(403) → 수정 순서로 동작하게 했습니다.
+
+**왜** 124 의 테스트를 통과시키는 구현입니다. 지금은 삭제/수정 권한 규칙이 같지만(작성자 본인), 메서드를 나눠 두면 "관리자는 삭제만 가능" 처럼 규칙이 달라질 때 한쪽만 바꿀 수 있습니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
