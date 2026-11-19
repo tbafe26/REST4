@@ -58,6 +58,7 @@
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | 엔티티를 그대로 JSON 으로 반환 | 글 ↔ 댓글 순환 참조로 직렬화가 끝나지 않음 (`Document nesting depth (501) exceeds the maximum allowed`) |
 | [`014`](https://github.com/tbafe26/REST4/commit/014) | 엔티티 필드명 `createDate` → `createdDate` | 응답 JSON 키가 바뀌고 기존 행의 값이 `null` 이 됨 |
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | 엔티티 필드명 `title`/`content` → `subject`/`body` | 응답 키가 `subject`, `body` 로 바뀌고, 댓글까지 키가 `body` 로 바뀜 |
+| [`017`](https://github.com/tbafe26/REST4/commit/017) | getter 없는 `PostDto` 반환 | 오류 없이 빈 객체가 응답됨: 다건 `[{},{},{}]`, 단건 `{}` |
 
 ## 패키지 구조
 
@@ -121,6 +122,7 @@ com.back
 | [`014`](https://github.com/tbafe26/REST4/commit/014) | [실험] 엔티티 필드명 createDate → createdDate 변경 | 엔티티 = API 스펙, ddl-auto update |
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | [실험] 엔티티 필드명 title/content → subject/body | 엔티티 변경의 파급 범위 |
 | [`016`](https://github.com/tbafe26/REST4/commit/016) | 엔티티 필드명 원상복구 | 엔티티와 API 응답의 분리 필요성 |
+| [`017`](https://github.com/tbafe26/REST4/commit/017) | [실험] PostDto 도입(getter 없음) | DTO, Jackson 직렬화는 getter 기반 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -317,3 +319,24 @@ public Post getItem(@PathVariable int id) {
 **왜** API 에서 쓰는 이름은 클라이언트와 협의하면서 언제든 바뀔 수 있습니다. 그때마다 엔티티와 DB 를 고치는 것은 비용이 너무 큽니다. 엔티티는 그대로 두고, **응답 전용 객체(DTO)** 에서 이름을 맞추는 방향으로 갑니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 다시 `createDate`, `title`, `content` 입니다.
+
+
+#### 017 [실험] PostDto 도입 — getter 가 없는 DTO
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/017) · [변경 내용](https://github.com/tbafe26/REST4/commit/017)
+
+**무엇을** `PostDto` 클래스를 만들고 컨트롤러가 엔티티 대신 `PostDto` 를 반환하게 했습니다. DTO 의 필드 이름은 클라이언트 요구대로 `createdDate`, `modifiedDate`, `subject`, `body` 입니다. 이제 댓글은 응답에 포함되지 않으므로 `PostComment.post` 의 `@JsonIgnore` 는 제거했습니다.
+
+**왜** 엔티티를 건드리지 않고 응답 모양만 바꾸려면 응답 전용 객체가 필요합니다. 다만 이 DTO 에는 `private final` 필드만 있고 getter 가 없습니다. Jackson 은 getter(또는 public 필드)로 값을 읽기 때문에 어떤 결과가 나오는지 확인하는 실험입니다.
+
+```java
+public class PostDto {
+    private final int id;
+    private final LocalDateTime createdDate;
+    private final LocalDateTime modifiedDate;
+    private final String subject;
+    private final String body;
+    // getter 없음
+}
+```
+
+**확인** (test 프로파일로 서버 실행 후 curl) 다건조회는 `[{},{},{}]`, 단건조회는 `{}` 가 **200** 으로 응답됩니다. 예외는 나지 않지만 Jackson 이 읽을 수 있는 속성이 없어 내용이 모두 사라집니다.
