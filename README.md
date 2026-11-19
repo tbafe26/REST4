@@ -803,6 +803,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`052`](https://github.com/tbafe26/REST4/commit/052) | `.andExpect(status().isCreated())` | 응답 검증 |
 | [`053`](https://github.com/tbafe26/REST4/commit/053) | `ResultActions` 로 요청/검증 분리 | 테스트 구조(요청 → 검증) |
 | [`054`](https://github.com/tbafe26/REST4/commit/054) | 글 수정 테스트(PUT, 200) | put() 요청 빌더 |
+| [`055`](https://github.com/tbafe26/REST4/commit/055) | ResponseAspect 포인트컷을 RsData 반환 메서드로 한정 | 포인트컷, 테스트가 리팩터링의 안전망 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -887,3 +888,21 @@ resultActions
 **왜** 이미 만든 수정 API 도 테스트로 보호합니다. 1번 글은 샘플 데이터로 항상 존재하고, `@Transactional` 롤백 덕분에 수정해도 다른 테스트에 영향이 없습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 055 ResponseAspect 적용 범위 개선
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/055) · [변경 내용](https://github.com/tbafe26/REST4/commit/055)
+
+**무엇을** `ResponseAspect` 의 포인트컷을 "`RsData` 를 반환하는 public 메서드 중 `@Controller`/`@RestController` 의 매핑 메서드" 로 바꿨습니다. 대상이 항상 `RsData` 이므로 `instanceof` 검사도 없앴습니다.
+
+**왜** 반환 타입으로 대상을 좁히면 불필요한 메서드까지 가로채지 않고 의도가 명확해집니다. 이런 **프로젝트 전반에 영향을 주는 변경**을 할 때 테스트가 있으면, 테스트를 돌리는 것만으로 기존 API 가 그대로 동작하는지 확인할 수 있습니다.
+
+```java
+@Around("""
+        execution(public com.back.global.rsData.RsData *(..)) &&
+        (within(@Controller *) || within(@RestController *)) &&
+        (@annotation(GetMapping) || @annotation(PostMapping) || ...)
+        """)
+```
+
+**확인** `./gradlew test` — 글 작성(201), 글 수정(200) 테스트가 그대로 통과해야 합니다.
