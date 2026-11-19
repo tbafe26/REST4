@@ -811,6 +811,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`060`](https://github.com/tbafe26/REST4/commit/060) | 🟢 PostWriteResBody 제거, `RsData<PostDto>` | Red → Green |
 | [`061`](https://github.com/tbafe26/REST4/commit/061) | 글 수정 테스트에 handler, resultCode, msg 검증 | 응답 본문 검증 |
 | [`062`](https://github.com/tbafe26/REST4/commit/062) | 수정 후 DB 값 assertThat 검증(선택) | AssertJ |
+| [`063`](https://github.com/tbafe26/REST4/commit/063) | DB 재조회 검증 제거 | 컨트롤러 테스트의 범위 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -992,5 +993,15 @@ resultActions
 **무엇을** 수정 요청 후 `postService.findById(id)` 로 글을 다시 조회해 제목/내용이 바뀌었는지 `assertThat` 으로 확인합니다.
 
 **왜** 응답이 "수정되었습니다" 라고 해도 실제 저장이 안 됐을 수 있습니다. DB 까지 확인하는 것은 더 확실하지만, 컨트롤러 테스트의 필수 범위는 아닙니다(선택 사항).
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 063 컨트롤러 테스트에서 과한 DB 검증 제거
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/063) · [변경 내용](https://github.com/tbafe26/REST4/commit/063)
+
+**무엇을** 062 에서 추가한 DB 재조회 검증을 지웠습니다.
+
+**왜** 컨트롤러 테스트는 **요청에 대한 응답**을 검증하는 것이 목적입니다. 저장 로직의 정확성은 서비스/리포지터리 쪽 관심사이고, 컨트롤러 테스트마다 DB 를 다시 확인하면 테스트가 길어지고 중복됩니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
