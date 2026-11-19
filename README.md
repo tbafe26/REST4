@@ -1227,6 +1227,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`093`](https://github.com/tbafe26/REST4/commit/093) | ApiV1PostController 에 @Tag, @Operation | 문서 설명 보강 |
 | [`094`](https://github.com/tbafe26/REST4/commit/094) | ApiV1PostCommentController 에 @Tag, @Operation | 문서 설명 보강 |
 | [`095`](https://github.com/tbafe26/REST4/commit/095) | `GET /test/fetchPosts` — 페이지가 API 를 추가 요청 | 브라우저 fetch, 추가 요청 |
+| [`096`](https://github.com/tbafe26/REST4/commit/096) | fetch 로 단건조회도 요청 | 여러 추가 요청 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1348,3 +1349,12 @@ springdoc:
 **왜** 실제 프론트엔드 앱은 HTML 을 받은 뒤 자바스크립트로 API 를 **추가 요청**합니다. 그 흐름을 가장 단순한 형태로 재현해 봅니다. 지금은 HTML 을 준 서버와 API 서버가 같습니다.
 
 **확인** http://localhost:8080/test/fetchPosts 접속 후 개발자 도구 콘솔/네트워크 탭에서 `/api/v1/posts` 요청과 응답을 확인합니다.
+
+#### 096 fetch 실습 — 글 단건조회 요청 추가
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/096) · [변경 내용](https://github.com/tbafe26/REST4/commit/096)
+
+**무엇을** 같은 페이지에서 `fetch("http://localhost:8080/api/v1/posts/1")` 요청을 하나 더 보냅니다.
+
+**왜** 한 페이지가 여러 API 를 추가로 요청하는 일반적인 상황을 만듭니다. 같은 서버로의 요청은 모두 문제없이 처리됩니다.
+
+**확인** 네트워크 탭에 `/api/v1/posts`, `/api/v1/posts/1` 두 요청이 보입니다.
