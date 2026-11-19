@@ -826,6 +826,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`075`](https://github.com/tbafe26/REST4/commit/075) | 잘못된 JSON 시 400, HttpMessageNotReadableException 처리 | 역직렬화 실패 응답 |
 | [`076`](https://github.com/tbafe26/REST4/commit/076) | ApiV1PostCommentControllerTest 설정(MockMvc, PostService) | 테스트 클래스 공통 설정 |
 | [`077`](https://github.com/tbafe26/REST4/commit/077) | 댓글 단건조회 테스트 | 중첩 경로 요청, DB 대조 |
+| [`078`](https://github.com/tbafe26/REST4/commit/078) | 댓글 다건조회 테스트, 개수·원소 검증 | 목록 검증 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1191,5 +1192,15 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **무엇을** `t1`("댓글 단건조회") 를 추가했습니다. `GET /api/v1/posts/1/comments/1` 응답의 id, 날짜, 내용을 `post.findCommentById(1)` 결과와 대조합니다.
 
 **왜** 글 단건조회 테스트와 같은 방식으로 댓글 조회 응답 스펙을 고정합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
+
+
+#### 078 댓글 다건조회 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/078) · [변경 내용](https://github.com/tbafe26/REST4/commit/078)
+
+**무엇을** `t2`("댓글 다건조회") 를 추가했습니다. 1번 글의 댓글 목록과 응답 배열의 길이, 각 원소(id, 날짜, 내용)를 대조합니다.
+
+**왜** 글 다건조회 테스트에서 배운 대로 길이와 원소를 모두 검증합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
