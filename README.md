@@ -56,6 +56,7 @@
 | 태그 | 실험 | 드러나는 문제 |
 |---|---|---|
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | 엔티티를 그대로 JSON 으로 반환 | 글 ↔ 댓글 순환 참조로 직렬화가 끝나지 않음 (`Document nesting depth (501) exceeds the maximum allowed`) |
+| [`014`](https://github.com/tbafe26/REST4/commit/014) | 엔티티 필드명 `createDate` → `createdDate` | 응답 JSON 키가 바뀌고 기존 행의 값이 `null` 이 됨 |
 
 ## 패키지 구조
 
@@ -116,6 +117,7 @@ com.back
 | [`011`](https://github.com/tbafe26/REST4/commit/011) | @RestController 로 통합 | @RestController |
 | [`012`](https://github.com/tbafe26/REST4/commit/012) | 클래스 레벨 @RequestMapping 으로 공통 경로 분리 | @RequestMapping |
 | [`013`](https://github.com/tbafe26/REST4/commit/013) | 글 단건조회 GET /api/v1/posts/{id} | @PathVariable |
+| [`014`](https://github.com/tbafe26/REST4/commit/014) | [실험] 엔티티 필드명 createDate → createdDate 변경 | 엔티티 = API 스펙, ddl-auto update |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -283,3 +285,12 @@ public Post getItem(@PathVariable int id) {
 ```
 
 **확인** `curl http://localhost:8080/api/v1/posts/1` 이 1번 글과 댓글 3개를 반환합니다.
+
+#### 014 [실험] 엔티티 필드명 변경 — createDate → createdDate
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/014) · [변경 내용](https://github.com/tbafe26/REST4/commit/014)
+
+**무엇을** `BaseEntity.createDate` 를 `createdDate` 로 이름만 바꿨습니다.
+
+**왜** 엔티티를 그대로 JSON 으로 내보내면 **필드 이름이 곧 API 스펙**이 됩니다. 내부 코드를 정리하려고 이름을 바꾸는 순간 외부(프론트엔드 등)가 쓰던 응답이 달라지고, 컬럼 이름도 함께 바뀌어 DB 까지 영향을 받는다는 것을 확인하는 실험입니다.
+
+> **확인해 볼 것** `curl http://localhost:8080/api/v1/posts/1` 응답의 키가 `createDate` 에서 `createdDate` 로 바뀌고, 기존 DB 데이터는 새 컬럼(`created_date`)이 비어 있어 값이 `null` 로 나옵니다(`ddl-auto: update` 가 컬럼을 새로 추가만 하기 때문). 로그에도 `add column created_date` 가 보입니다.
