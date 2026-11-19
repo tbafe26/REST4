@@ -151,6 +151,7 @@ com.back
 | [`041`](https://github.com/tbafe26/REST4/commit/041) | Map → 전용 record PostWriteResBody | 액션별 응답 본문 타입 |
 | [`042`](https://github.com/tbafe26/REST4/commit/042) | 지역 변수 제거, 인라인 생성 | 가독성 정리 |
 | [`043`](https://github.com/tbafe26/REST4/commit/043) | 작성 성공 resultCode `201-1` | 201 Created, resultCode ≠ HTTP 상태 |
+| [`044`](https://github.com/tbafe26/REST4/commit/044) | ResponseEntity + HttpStatus.CREATED | HTTP 상태 코드 직접 지정 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -688,3 +689,17 @@ public record PostWriteResBody(long totalCount, PostDto post) { }
 **왜** 201(Created)은 "성공했고, 그 결과 무언가가 새로 생성됐다"는 뜻으로 작성 성공에 가장 정확한 코드입니다. 그런데 `resultCode` 는 응답 본문 안의 문자열일 뿐이라 **실제 HTTP 응답 상태 코드는 여전히 200** 입니다.
 
 > **확인해 볼 것** `curl -i -X POST ...` 로 응답 헤더를 보면 상태 줄은 `200` 인데 본문의 `resultCode` 만 `201-1` 입니다.
+
+
+#### 044 ResponseEntity 로 HTTP 상태 코드 201 설정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/044) · [변경 내용](https://github.com/tbafe26/REST4/commit/044)
+
+**무엇을** 글 작성 반환 타입을 `ResponseEntity<RsData<PostWriteResBody>>` 로 감싸고 `HttpStatus.CREATED` 를 지정했습니다.
+
+**왜** 실제 HTTP 상태 코드를 바꾸려면 응답 자체(상태 코드, 헤더, 본문)를 다루는 `ResponseEntity` 가 필요합니다. 동작은 하지만 반환 타입과 생성 코드가 한 겹 더 감싸져 장황해집니다. 상태 코드 하나 바꾸려고 모든 액션을 이렇게 쓰는 것은 부담입니다.
+
+```java
+return new ResponseEntity<>(new RsData<>("201-1", ...), HttpStatus.CREATED);
+```
+
+**확인** `curl -i -X POST ...` 의 상태 줄이 `201` 입니다.
