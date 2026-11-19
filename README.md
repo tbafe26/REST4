@@ -80,6 +80,13 @@
 com.back
 ├─ BackApplication
 ├─ domain
+│  ├─ member
+│  │  └─ member
+│  │     ├─ controller   ApiV1MemberController
+│  │     ├─ dto          MemberDto (password 없음)
+│  │     ├─ entity       Member
+│  │     ├─ repository   MemberRepository
+│  │     └─ service      MemberService (join, getActor)
 │  ├─ home
 │  │  └─ home
 │  │     └─ controller   HomeController (메인 페이지, fetch 실습)
@@ -97,6 +104,7 @@ com.back
 └─ global
    ├─ aspect             ResponseAspect (resultCode → HTTP 상태 코드)
    ├─ globalExceptionHandler  GlobalExceptionHandler (예외 → RsData 응답)
+   │                     MemberDuplicateUsernameException(409), UnauthenticatedException(401), AccessDeniedException(403)
    ├─ initData           BaseInitData (샘플 데이터)
    ├─ jpa.entity         BaseEntity
    ├─ rsData             RsData (공통 응답)
@@ -110,15 +118,41 @@ com.back
 
 기본 경로는 `http://localhost:8080` 입니다. 단계가 진행되면서 응답 형태가 바뀌므로, 아래는 **최신 단계 기준**이며 단계별 변화는 작업내역에 적혀 있습니다.
 
+### 행위자(actorId) 규칙
+
+로그인 기능 대신 요청 주소에 `?actorId=회원번호` 를 붙여 "누가 요청했는지" 를 표현합니다.
+
+- 행위자가 필요한 액션: 내 정보, 글 작성/수정/삭제, 댓글 작성/수정/삭제
+- `actorId` 가 없거나 존재하지 않는 회원이면 **401** (`401-1`, `로그인 후 이용해주세요.`)
+- 글/댓글 수정·삭제에서 행위자가 작성자가 아니면 **403** (`403-1`, `권한이 없습니다.`)
+
+샘플 회원 (비밀번호는 모두 `12345678`)
+
+| username | 이름 | 샘플 데이터 |
+|---|---|---|
+| system | 시스템 | - |
+| admin | 관리자 | - |
+| user1 | 유저1 | 1번 글, 1·4번 댓글 작성자 |
+| user2 | 유저2 | 2번 글, 2·5번 댓글 작성자 |
+| user3 | 유저3 | 3번 글, 3번 댓글 작성자 |
+| user4 | 유저4 | - |
+
+### 회원 `/api/v1/members`
+
+| 메서드 | 경로 | 요청 본문 | 성공 응답 |
+|---|---|---|---|
+| POST | `/api/v1/members/join` | `{"username", "password", "name"}` | 201, `RsData<Void>` (`201-1`) |
+| GET | `/api/v1/members/me?actorId=` | - | 200, `MemberDto` (`id, createDate, modifyDate, username, name`) |
+
 ### 글 `/api/v1/posts`
 
 | 메서드 | 경로 | 요청 본문 | 성공 응답 |
 |---|---|---|---|
 | GET | `/api/v1/posts` | - | 200, `PostDto[]` |
 | GET | `/api/v1/posts/{id}` | - | 200, `PostDto` |
-| POST | `/api/v1/posts` | `{"title", "content"}` | 201, `RsData<PostDto>` (`201-1`) |
-| PUT | `/api/v1/posts/{id}` | `{"title", "content"}` | 200, `RsData<Void>` (`200-1`) |
-| DELETE | `/api/v1/posts/{id}` | - | 200, `RsData<Void>` (`200-1`) |
+| POST | `/api/v1/posts?actorId=` | `{"title", "content"}` | 201, `RsData<PostDto>` (`201-1`) |
+| PUT | `/api/v1/posts/{id}?actorId=` | `{"title", "content"}` | 200, `RsData<Void>` (`200-1`) |
+| DELETE | `/api/v1/posts/{id}?actorId=` | - | 200, `RsData<Void>` (`200-1`) |
 
 ### 댓글 `/api/v1/posts/{postId}/comments`
 
@@ -126,9 +160,11 @@ com.back
 |---|---|---|---|
 | GET | `/api/v1/posts/{postId}/comments` | - | 200, `PostCommentDto[]` |
 | GET | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `PostCommentDto` |
-| POST | `/api/v1/posts/{postId}/comments` | `{"content"}` | 201, `RsData<PostCommentDto>` (`201-1`) |
-| PUT | `/api/v1/posts/{postId}/comments/{id}` | `{"content"}` | 200, `RsData<Void>` (`200-1`) |
-| DELETE | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `RsData<Void>` (`200-1`) |
+| POST | `/api/v1/posts/{postId}/comments?actorId=` | `{"content"}` | 201, `RsData<PostCommentDto>` (`201-1`) |
+| PUT | `/api/v1/posts/{postId}/comments/{id}?actorId=` | `{"content"}` | 200, `RsData<Void>` (`200-1`) |
+| DELETE | `/api/v1/posts/{postId}/comments/{id}?actorId=` | - | 200, `RsData<Void>` (`200-1`) |
+
+`PostDto` 는 `id, createDate, modifyDate, authorId, authorName, title, content`, `PostCommentDto` 는 `id, createDate, modifyDate, authorId, authorName, content` 입니다.
 
 ### 응답 규칙
 
@@ -138,7 +174,7 @@ com.back
 {
   "resultCode": "201-1",
   "msg": "4번 글이 작성되었습니다.",
-  "data": { "id": 4, "createDate": "...", "modifyDate": "...", "title": "제목", "content": "내용" }
+  "data": { "id": 4, "createDate": "...", "modifyDate": "...", "authorId": 3, "authorName": "유저1", "title": "제목", "content": "내용" }
 }
 ```
 
@@ -149,6 +185,9 @@ com.back
 | 없는 글/댓글 조회 | 404 | `404-1` | 해당 데이터가 존재하지 않습니다. |
 | 요청 본문 검증 실패 | 400 | `400-1` | `필드-제약-메시지` (여러 줄, 정렬) |
 | JSON 문법 오류 | 400 | `400-1` | 요청 본문이 올바르지 않습니다. |
+| actorId 없음 / 존재하지 않는 회원 | 401 | `401-1` | 로그인 후 이용해주세요. |
+| 작성자가 아닌 회원의 수정·삭제 | 403 | `403-1` | 권한이 없습니다. |
+| 이미 사용 중인 username 으로 가입 | 409 | `409-1` | `{username}(은)는 이미 사용중인 username 입니다.` |
 
 ## 작업내역
 
@@ -1451,6 +1490,7 @@ registry.addMapping("/api/**")
 | [`127`](https://github.com/tbafe26/REST4/commit/127) | 🟢 `postComment.checkActorCanDelete(actor)` | 댓글 삭제 권한 검사 |
 | [`128`](https://github.com/tbafe26/REST4/commit/128) | 🔴 댓글 수정: 작성자 성공, 타인 403, actorId 없음 401 | 마지막 권한 규칙 |
 | [`129`](https://github.com/tbafe26/REST4/commit/129) | 🟢 `postComment.checkActorCanModify(actor)` | 댓글 수정 권한 검사 |
+| [`130`](https://github.com/tbafe26/REST4/commit/130) | actorId 에 `@Parameter` 설명, README API 명세·행위자 규칙 정리 | 문서와 코드의 일치 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1802,3 +1842,15 @@ public void checkActorCanDelete(Member actor) {
 **왜** 128 의 테스트를 통과시키는 구현입니다. 이로써 행위자가 필요한 7개 액션(내 정보, 글 작성/수정/삭제, 댓글 작성/수정/삭제)이 모두 `actorId` 규칙을 따릅니다.
 
 **확인** `./gradlew test`
+
+#### 130 API 문서에 actorId 설명 추가, README 4부 정리
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/130) · [변경 내용](https://github.com/tbafe26/REST4/commit/130)
+
+**무엇을** 행위자가 필요한 7개 액션의 `actorId` 파라미터에 `@Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용")` 를 붙였습니다. README 의 API 명세를 회원 API, `actorId` 규칙, 샘플 회원, 401/403/409 응답까지 포함하도록 정리했습니다.
+
+**왜** Swagger UI 를 보는 사람이 `actorId` 가 무엇인지 코드를 읽지 않고도 알 수 있어야 합니다. 기능이 모두 갖춰졌으므로 문서도 최종 상태에 맞춥니다.
+
+**확인** `./gradlew bootRun` 후 http://localhost:8080/swagger-ui/index.html 에서 `actorId` 설명 확인
+
+![글 작성 API 문서에 actorId 파라미터 설명이 표시됨](docs/images/130.png)
+

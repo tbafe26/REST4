@@ -5,6 +5,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -53,7 +54,7 @@ public class ApiV1MemberController {
     @Transactional(readOnly = true)
     @Operation(summary = "내 정보")
     public MemberDto me(
-            @RequestParam(defaultValue = "0") int actorId // 없으면 0 → 존재하지 않는 회원 → 401
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId // 없으면 0 → 존재하지 않는 회원 → 401
     ) {
         Member actor = memberService.getActor(actorId);
 

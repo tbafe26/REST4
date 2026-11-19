@@ -8,6 +8,7 @@ import com.back.domain.post.postComment.dto.PostCommentDto;
 import com.back.domain.post.postComment.entity.PostComment;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -59,7 +60,7 @@ public class ApiV1PostCommentController {
     public RsData<Void> delete(
             @PathVariable int postId,
             @PathVariable int id,
-            @RequestParam(defaultValue = "0") int actorId
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId
     ) {
         Member actor = memberService.getActor(actorId);
 
@@ -90,7 +91,7 @@ public class ApiV1PostCommentController {
     public RsData<Void> modify(
             @PathVariable int postId,
             @PathVariable int id,
-            @RequestParam(defaultValue = "0") int actorId,
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId,
             @RequestBody @Valid PostCommentModifyReqBody reqBody
     ) {
         Member actor = memberService.getActor(actorId);
@@ -121,7 +122,7 @@ public class ApiV1PostCommentController {
     @Operation(summary = "작성")
     public RsData<PostCommentDto> write(
             @PathVariable int postId,
-            @RequestParam(defaultValue = "0") int actorId,
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId,
             @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
         Member actor = memberService.getActor(actorId);

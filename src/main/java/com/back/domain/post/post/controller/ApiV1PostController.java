@@ -7,6 +7,7 @@ import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -53,7 +54,7 @@ public class ApiV1PostController {
     @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable int id,
-            @RequestParam(defaultValue = "0") int actorId
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId
     ) {
         Member actor = memberService.getActor(actorId);
 
@@ -84,7 +85,7 @@ public class ApiV1PostController {
     @Transactional
     @Operation(summary = "작성")
     public RsData<PostDto> write(
-            @RequestParam(defaultValue = "0") int actorId,
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId,
             @RequestBody @Valid PostWriteReqBody reqBody
     ) {
         Member actor = memberService.getActor(actorId);
@@ -114,7 +115,7 @@ public class ApiV1PostController {
     @Operation(summary = "수정")
     public RsData<Void> modify(
             @PathVariable int id,
-            @RequestParam(defaultValue = "0") int actorId,
+            @Parameter(description = "행위자(요청한 회원) 번호, 로그인 대신 사용") @RequestParam(defaultValue = "0") int actorId,
             @RequestBody @Valid PostModifyReqBody reqBody
     ) {
         Member actor = memberService.getActor(actorId);
