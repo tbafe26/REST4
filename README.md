@@ -807,6 +807,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`056`](https://github.com/tbafe26/REST4/commit/056) | `handler().handlerType/methodName` 검증 | 요청 매핑 검증 |
 | [`057`](https://github.com/tbafe26/REST4/commit/057) | 최신 글·전체 글 수를 DB 에서 조회해 응답과 대조 | jsonPath, 쿼리 메서드 findFirstByOrderByIdDesc |
 | [`058`](https://github.com/tbafe26/REST4/commit/058) | data.post 의 모든 필드 검증 | 응답 스펙을 테스트로 고정 |
+| [`059`](https://github.com/tbafe26/REST4/commit/059) | 🔴 작성 응답 data 를 PostDto 로 기대하도록 테스트 수정 | 요구 변경 시 테스트 먼저 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -950,3 +951,13 @@ resultActions
 **왜** 응답에 담긴 **모든 필드**를 테스트해야 클라이언트에게 약속한 응답 형태(스펙)가 바뀌었을 때 바로 알 수 있습니다. 테스트가 곧 살아 있는 API 문서가 됩니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 059 🔴 요구사항 변경(totalCount 제거)을 테스트에 먼저 반영
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/059) · [변경 내용](https://github.com/tbafe26/REST4/commit/059)
+
+**무엇을** "글 작성 응답에 `totalCount` 는 더 이상 필요 없고, `data` 에 글 정보만 바로 담아 달라"는 변경 요구를 받았습니다. 구현은 그대로 두고 테스트의 기대값만 `$.data.post.*` → `$.data.*` 로 바꿨습니다.
+
+**왜** 이미 있는 기능의 요구사항이 바뀌면 **테스트를 먼저 고쳐** 새 요구를 코드로 명시합니다. 그러면 테스트가 실패하면서 "아직 구현이 요구를 만족하지 않는다"는 것을 보여 주고, 구현을 고친 뒤 통과하는 것으로 완료를 판단할 수 있습니다.
+
+**확인** `글 작성` 테스트가 `No value at JSON path "$.data.id"` 로 실패합니다. 구현은 아직 `data.totalCount`, `data.post` 구조로 응답하기 때문입니다.
