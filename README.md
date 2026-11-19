@@ -125,6 +125,7 @@ com.back
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | [실험] PostDto 도입(getter 없음) | DTO, Jackson 직렬화는 getter 기반 |
 | [`018`](https://github.com/tbafe26/REST4/commit/018) | `fail-on-empty-beans` 설정 메모 | Jackson 직렬화 설정 |
 | [`019`](https://github.com/tbafe26/REST4/commit/019) | PostDto 에 @Getter | Lombok @Getter, 직렬화 대상 속성 |
+| [`020`](https://github.com/tbafe26/REST4/commit/020) | PostDto → record | record, 불변 DTO |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -368,3 +369,21 @@ public class PostDto {
 **왜** Jackson 이 값을 읽을 수 있도록 getter 를 만들어 주는 것이 정답입니다. 이제 응답 JSON 에 `id`, `createdDate`, `modifiedDate`, `subject`, `body` 가 담깁니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts` 응답에 DTO 의 다섯 필드가 모두 보입니다.
+
+
+#### 020 PostDto 를 record 로 변경
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/020) · [변경 내용](https://github.com/tbafe26/REST4/commit/020)
+
+**무엇을** `PostDto` 를 `record` 로 바꿨습니다. `Post` 를 받는 보조 생성자는 `this(...)` 로 정식 생성자를 호출합니다.
+
+**왜** DTO 는 값을 담아 전달만 하는 불변 객체입니다. `record` 는 `private final` 필드, 생성자, 접근자(`id()` 등), `equals/hashCode/toString` 을 자동으로 만들어 주고, Jackson 도 record 의 접근자를 그대로 읽습니다. `@Getter` 와 필드 선언이 모두 사라져 코드가 짧아집니다.
+
+```java
+public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedDate, String subject, String body) {
+    public PostDto(Post post) {
+        this(post.getId(), post.getCreateDate(), post.getModifyDate(), post.getTitle(), post.getContent());
+    }
+}
+```
+
+**확인** 응답 JSON 은 019 와 같습니다.
