@@ -78,6 +78,7 @@
 | [`007`](https://github.com/tbafe26/REST4/commit/007) | PostRepository, PostService | Spring Data JPA, 서비스 계층 |
 | [`008`](https://github.com/tbafe26/REST4/commit/008) | 샘플 데이터(글 3, 댓글 5) 생성 | ApplicationRunner, 자기 주입 @Lazy |
 | [`009`](https://github.com/tbafe26/REST4/commit/009) | [실험] 글 다건조회 API, 엔티티 순환 참조로 JSON 무한 중첩 | Jackson 직렬화, 순환 참조 |
+| [`010`](https://github.com/tbafe26/REST4/commit/010) | @JsonIgnore 로 순환 참조 해결 | @JsonIgnore |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -182,3 +183,18 @@ private BaseInitData self;
 **왜** 가장 단순한 방식으로 JSON 응답을 만들어 보고, 엔티티를 그대로 내보낼 때 어떤 문제가 생기는지 확인하려는 실험입니다. `Post.comments` 의 각 댓글이 `post` 를 다시 가리키고, 그 글이 또 `comments` 를 가리키는 순환 참조 때문에 Jackson 이 직렬화를 끝내지 못합니다.
 
 > **확인해 볼 것** 서버를 띄워 `curl -i http://localhost:8080/api/v1/posts` 를 호출하면 응답이 `200` 으로 시작하지만 `comments → post → comments → …` 가 끝없이 중첩되다 잘립니다. 서버 로그에는 `HttpMessageNotWritableException: Could not write JSON: Document nesting depth (501) exceeds the maximum allowed (500)` 가 남습니다. 다음 단계에서 해결합니다.
+
+#### 010 @JsonIgnore 로 순환 참조 끊기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/010) · [변경 내용](https://github.com/tbafe26/REST4/commit/010)
+
+**무엇을** `PostComment.post` 필드에 `@JsonIgnore` 를 붙였습니다.
+
+**왜** 순환의 한 고리(댓글 → 글)를 JSON 직렬화에서 빼면 글 → 댓글 방향으로만 출력되어 무한 중첩이 사라집니다. 댓글은 어차피 글 안에 들어 있으므로 `post` 를 다시 보여 줄 필요가 없습니다.
+
+```java
+@ManyToOne(fetch = LAZY)
+@JsonIgnore
+private Post post;
+```
+
+**확인** `curl http://localhost:8080/api/v1/posts` 가 글 3개를 각 댓글 목록과 함께 정상 JSON 으로 반환합니다.

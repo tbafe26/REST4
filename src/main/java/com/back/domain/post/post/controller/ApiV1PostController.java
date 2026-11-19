@@ -14,7 +14,6 @@ import java.util.List;
 public class ApiV1PostController {
     private final PostService postService;
 
-    // [실험] 엔티티(Post)를 그대로 반환하면 Post -> comments -> post -> comments ... 로 JSON 직렬화가 끝나지 않는다
     @GetMapping("/api/v1/posts")
     @ResponseBody
     public List<Post> getItems() {
