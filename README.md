@@ -148,6 +148,7 @@ com.back
 | [`038`](https://github.com/tbafe26/REST4/commit/038) | PostWriteForm → PostWriteReqBody | 이름이 역할을 드러내게 |
 | [`039`](https://github.com/tbafe26/REST4/commit/039) | 작성 응답 data 를 List(totalCount, post) 로 | data 에 여러 값 담기 |
 | [`040`](https://github.com/tbafe26/REST4/commit/040) | List → Map(totalCount, post) | 이름 있는 응답 필드 |
+| [`041`](https://github.com/tbafe26/REST4/commit/041) | Map → 전용 record PostWriteResBody | 액션별 응답 본문 타입 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -651,3 +652,17 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 **왜** Map 은 키가 있어 JSON 이 `{"totalCount": 4, "post": {...}}` 처럼 읽기 쉽습니다. 다만 키는 문자열이라 오타를 컴파일러가 잡지 못하고, 반환 타입 `Map<String, Object>` 만 보고는 어떤 키가 오는지 알 수 없습니다.
 
 **확인** `data` 가 `{"totalCount": ..., "post": {...}}` 로 나옵니다.
+
+
+#### 041 글 작성 전용 응답 본문 record PostWriteResBody
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/041) · [변경 내용](https://github.com/tbafe26/REST4/commit/041)
+
+**무엇을** 컨트롤러 안에 `record PostWriteResBody(long totalCount, PostDto post)` 를 만들고 반환 타입을 `RsData<PostWriteResBody>` 로 바꿨습니다.
+
+**왜** 해당 액션 전용 응답 타입을 두면 JSON 결과는 Map 과 같으면서도 필드 이름과 타입이 컴파일 시점에 고정되고, 반환 타입만으로 응답 구조를 알 수 있습니다. 요청은 `...ReqBody`, 응답은 `...ResBody` 로 짝을 맞춥니다.
+
+```java
+public record PostWriteResBody(long totalCount, PostDto post) { }
+```
+
+**확인** 응답 JSON 은 040 과 같습니다.
