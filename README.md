@@ -823,6 +823,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`072`](https://github.com/tbafe26/REST4/commit/072) | ResponseEntity 방식 + @ControllerAdvice | 예외 응답 상태 코드 지정 방법 B |
 | [`073`](https://github.com/tbafe26/REST4/commit/073) | 제목 없이 작성 시 400, MethodArgumentNotValidException 처리 | @Valid 실패 응답 |
 | [`074`](https://github.com/tbafe26/REST4/commit/074) | 내용 없이 작성 시 400 테스트 | 같은 규칙의 실패 케이스 추가 |
+| [`075`](https://github.com/tbafe26/REST4/commit/075) | 잘못된 JSON 시 400, HttpMessageNotReadableException 처리 | 역직렬화 실패 응답 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1158,5 +1159,15 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **무엇을** 내용이 빈 문자열인 글 작성 테스트(`t8`)를 추가했습니다. 기대 메시지는 `content-NotBlank-...`, `content-Size-...` 두 줄입니다.
 
 **왜** 073 의 핸들러가 다른 필드에도 같은 규칙으로 동작하는지 확인합니다. 구현 변경은 없습니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 075 잘못된 JSON 으로 글 작성 → 400
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/075) · [변경 내용](https://github.com/tbafe26/REST4/commit/075)
+
+**무엇을** 문법이 깨진 JSON 으로 글 작성을 요청하는 테스트(`t9`)와 `HttpMessageNotReadableException` 핸들러(`400-1`, `요청 본문이 올바르지 않습니다.`)를 추가했습니다.
+
+**왜** JSON 자체를 읽을 수 없으면 `@Valid` 검증 전에 역직렬화 단계에서 실패합니다. 이 경우도 클라이언트가 원인을 알 수 있게 우리 응답 형식으로 돌려줍니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
