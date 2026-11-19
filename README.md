@@ -1426,6 +1426,7 @@ registry.addMapping("/api/**")
 | [`102`](https://github.com/tbafe26/REST4/commit/102) | 🟢 회원가입 구현, MemberJoinReqBody 제약 | @Valid, RsData<Void> |
 | [`103`](https://github.com/tbafe26/REST4/commit/103) | 🔴 username 중복 시 409, `409-1` 기대 | 실패 시나리오 먼저 |
 | [`104`](https://github.com/tbafe26/REST4/commit/104) | 🟢 중복 검사 + MemberDuplicateUsernameException → 409-1 | 의미 있는 예외 클래스, 예외 핸들러 |
+| [`105`](https://github.com/tbafe26/REST4/commit/105) | 🔵 `findByUsername(...).ifPresent(_ -> throw)` | Optional, 이름 없는 변수 `_` |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1486,5 +1487,21 @@ if (memberRepository.findByUsername(username).isPresent()) {
 ```
 
 **왜** `IllegalArgumentException` 같은 범용 예외를 쓰면 "무엇이 잘못됐는지" 가 드러나지 않고, 핸들러에서 다른 상황과 구분하기도 어렵습니다. 상황에 맞는 예외 클래스를 두면 코드가 의도를 설명하고, 예외 → 응답 매핑을 정확하게 할 수 있습니다. 메시지는 예외가 만들어질 때 정해지므로 핸들러는 `ex.getMessage()` 만 쓰면 됩니다.
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 105 🔵 Optional.ifPresent 로 중복 검사 정리
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/105) · [변경 내용](https://github.com/tbafe26/REST4/commit/105)
+
+**무엇을** `isPresent()` + `if` 문을 `Optional.ifPresent` 로 바꿨습니다. 쓰지 않는 람다 매개변수는 `_` 로 표기했습니다.
+
+```java
+memberRepository.findByUsername(username)
+        .ifPresent(_ -> {
+            throw new MemberDuplicateUsernameException(username);
+        });
+```
+
+**왜** "있으면 예외" 라는 의도가 한 흐름으로 읽힙니다. 동작은 같으므로 104 의 테스트가 그대로 통과해야 합니다. 테스트가 리팩터링의 안전망 역할을 합니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`

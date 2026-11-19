@@ -14,9 +14,10 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     public Member join(String username, String password, String name) {
-        if (memberRepository.findByUsername(username).isPresent()) {
-            throw new MemberDuplicateUsernameException(username);
-        }
+        memberRepository.findByUsername(username)
+                .ifPresent(_ -> {
+                    throw new MemberDuplicateUsernameException(username);
+                });
 
         Member member = new Member(username, password, name);
 
