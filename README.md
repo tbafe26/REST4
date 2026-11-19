@@ -145,6 +145,7 @@ com.back
 | [`035`](https://github.com/tbafe26/REST4/commit/035) | 삭제 응답 RsData<Void>, data 없는 생성자 | Void 타입 인자 |
 | [`036`](https://github.com/tbafe26/REST4/commit/036) | 글/댓글 삭제 → `DELETE /{id}` | HTTP 메서드의 의미 |
 | [`037`](https://github.com/tbafe26/REST4/commit/037) | 글 작성 `POST /api/v1/posts`, JSON 본문 + 검증 | @RequestBody, @Valid |
+| [`038`](https://github.com/tbafe26/REST4/commit/038) | PostWriteForm → PostWriteReqBody | 이름이 역할을 드러내게 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -618,3 +619,13 @@ public RsData<PostDto> write(@RequestBody @Valid PostWriteForm form) {
 ```
 
 **확인** `curl -X POST http://localhost:8080/api/v1/posts -H "Content-Type: application/json" -d '{"title":"제목","content":"내용"}'`
+
+
+#### 038 요청 본문 record 이름을 PostWriteReqBody 로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/038) · [변경 내용](https://github.com/tbafe26/REST4/commit/038)
+
+**무엇을** `PostWriteForm` 을 `PostWriteReqBody` 로, 매개변수 `form` 을 `reqBody` 로 바꿨습니다.
+
+**왜** REST API 에는 HTML 폼이 없습니다. 이 객체는 **요청 본문(Request Body)** 을 담는 것이므로 이름도 그 역할을 드러내게 합니다. 이후 응답 본문 전용 객체는 `...ResBody` 로 짝을 맞춥니다.
+
+**확인** 동작은 이전과 같습니다.
