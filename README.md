@@ -123,6 +123,7 @@ com.back
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | [실험] 엔티티 필드명 title/content → subject/body | 엔티티 변경의 파급 범위 |
 | [`016`](https://github.com/tbafe26/REST4/commit/016) | 엔티티 필드명 원상복구 | 엔티티와 API 응답의 분리 필요성 |
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | [실험] PostDto 도입(getter 없음) | DTO, Jackson 직렬화는 getter 기반 |
+| [`018`](https://github.com/tbafe26/REST4/commit/018) | `fail-on-empty-beans` 설정 메모 | Jackson 직렬화 설정 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -340,3 +341,19 @@ public class PostDto {
 ```
 
 **확인** (test 프로파일로 서버 실행 후 curl) 다건조회는 `[{},{},{}]`, 단건조회는 `{}` 가 **200** 으로 응답됩니다. 예외는 나지 않지만 Jackson 이 읽을 수 있는 속성이 없어 내용이 모두 사라집니다.
+
+
+#### 018 Jackson 빈 객체 직렬화 설정 살펴보기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/018) · [변경 내용](https://github.com/tbafe26/REST4/commit/018)
+
+**무엇을** `application.yaml` 에 `spring.jackson.serialization.fail-on-empty-beans: false` 설정을 **주석으로** 남겼습니다.
+
+**왜** 읽을 수 있는 속성이 하나도 없는 객체를 직렬화할 때 오류를 낼지(`true`) 빈 객체 `{}` 로 내보낼지(`false`) 정하는 설정입니다. 예전에는 `true` 가 기본값이라 getter 없는 DTO 가 바로 오류를 냈지만, 지금 쓰는 버전은 기본값이 `false` 라서 따로 켤 필요가 없습니다. 오류가 안 난다고 문제가 해결된 것은 아니라는 점을 기록해 둡니다.
+
+```yaml
+#  jackson:
+#    serialization:
+#      fail-on-empty-beans: false # 예전에는 true가 기본값이었지만, 지금은 false가 기본값입니다.
+```
+
+**확인** 설정 주석만 추가했으므로 동작 변화는 없습니다.
