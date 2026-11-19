@@ -131,6 +131,7 @@ com.back
 | [`022`](https://github.com/tbafe26/REST4/commit/022) | `.map(PostDto::new)` | 생성자 메서드 참조 |
 | [`023`](https://github.com/tbafe26/REST4/commit/023) | 댓글 다건/단건조회, PostCommentDto | 중첩 리소스 경로, 다중 @PathVariable |
 | [`024`](https://github.com/tbafe26/REST4/commit/024) | [실험] 댓글 삭제(GET 임시), @Transactional 없음 | 트랜잭션과 더티체킹 |
+| [`025`](https://github.com/tbafe26/REST4/commit/025) | 액션 메서드에 @Transactional / readOnly | 영속성 컨텍스트, orphanRemoval, readOnly 트랜잭션 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -443,3 +444,19 @@ public PostCommentDto getItem(@PathVariable int postId, @PathVariable int id) {
 **왜** 컬렉션에서 빼는 것만으로 DELETE 쿼리가 나가려면 엔티티가 **영속성 컨텍스트에 관리되는 상태에서 트랜잭션이 커밋**되어야 합니다. 그 조건이 없는 지금 상태에서 어떻게 되는지 확인하는 실험입니다.
 
 **확인** (test 프로파일로 서버 실행 후 curl) `GET /api/v1/posts/1/comments/1/delete` 는 `1번 댓글이 삭제되었습니다.` 를 **200** 으로 응답하지만, 이어서 `GET /api/v1/posts/1/comments` 를 보면 1번 댓글이 **그대로 남아 있습니다**. 서버 로그에도 `delete` 쿼리가 없습니다. 트랜잭션 밖에서는 컬렉션에서 빼는 것이 DB 에 반영되지 않습니다.
+
+
+#### 025 액션 메서드에 @Transactional 적용
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/025) · [변경 내용](https://github.com/tbafe26/REST4/commit/025)
+
+**무엇을** 조회 액션에는 `@Transactional(readOnly = true)`, 댓글 삭제 액션에는 `@Transactional` 을 붙였습니다.
+
+**왜** 하나의 요청 안에서 글 조회 → 댓글 제거가 **같은 트랜잭션** 안에서 일어나야 영속성 컨텍스트가 변경을 추적하고, 커밋 시점에 `orphanRemoval` 에 의한 DELETE 가 실행됩니다. 조회만 하는 액션은 `readOnly = true` 로 의도를 드러내고 불필요한 변경 감지를 줄입니다.
+
+```java
+@GetMapping("/{id}/delete")
+@Transactional
+public String delete(@PathVariable int postId, @PathVariable int id) { ... }
+```
+
+**확인** `curl http://localhost:8080/api/v1/posts/1/comments/1/delete` 후 `.../comments` 목록에서 1번 댓글이 사라집니다.
