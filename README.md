@@ -23,6 +23,7 @@
 | 편의 도구 | Lombok, Spring Boot DevTools |
 | 데이터 | Spring Data JPA, H2 (개발용 파일 DB / 테스트용 메모리 DB), H2 콘솔 |
 | 검증 | Bean Validation (spring-boot-starter-validation) |
+| 테스트 | JUnit 5, MockMvc, AssertJ, Hamcrest |
 
 > 이후 단계에서 의존성이 늘어나면 이 표도 함께 갱신됩니다.
 
@@ -99,7 +100,7 @@ com.back
 |---|---|---|---|
 | GET | `/api/v1/posts` | - | 200, `PostDto[]` |
 | GET | `/api/v1/posts/{id}` | - | 200, `PostDto` |
-| POST | `/api/v1/posts` | `{"title", "content"}` | 201, `RsData<PostWriteResBody>` (`201-1`) |
+| POST | `/api/v1/posts` | `{"title", "content"}` | 201, `RsData<PostDto>` (`201-1`) |
 | PUT | `/api/v1/posts/{id}` | `{"title", "content"}` | 200, `RsData<Void>` (`200-1`) |
 | DELETE | `/api/v1/posts/{id}` | - | 200, `RsData<Void>` (`200-1`) |
 
@@ -109,6 +110,7 @@ com.back
 |---|---|---|---|
 | GET | `/api/v1/posts/{postId}/comments` | - | 200, `PostCommentDto[]` |
 | GET | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `PostCommentDto` |
+| POST | `/api/v1/posts/{postId}/comments` | `{"content"}` | 201, `RsData<PostCommentDto>` (`201-1`) |
 | PUT | `/api/v1/posts/{postId}/comments/{id}` | `{"content"}` | 200, `RsData<Void>` (`200-1`) |
 | DELETE | `/api/v1/posts/{postId}/comments/{id}` | - | 200, `RsData<Void>` (`200-1`) |
 
@@ -120,9 +122,17 @@ com.back
 {
   "resultCode": "201-1",
   "msg": "4번 글이 작성되었습니다.",
-  "data": { "totalCount": 4, "post": { "id": 4, "createDate": "...", "modifyDate": "...", "title": "제목", "content": "내용" } }
+  "data": { "id": 4, "createDate": "...", "modifyDate": "...", "title": "제목", "content": "내용" }
 }
 ```
+
+실패 응답도 같은 형태입니다(`GlobalExceptionHandler`).
+
+| 상황 | HTTP 상태 | resultCode | msg |
+|---|---|---|---|
+| 없는 글/댓글 조회 | 404 | `404-1` | 해당 데이터가 존재하지 않습니다. |
+| 요청 본문 검증 실패 | 400 | `400-1` | `필드-제약-메시지` (여러 줄, 정렬) |
+| JSON 문법 오류 | 400 | `400-1` | 요청 본문이 올바르지 않습니다. |
 
 ## 작업내역
 
@@ -797,6 +807,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`080`](https://github.com/tbafe26/REST4/commit/080) | 댓글 수정 테스트(PUT, 200-1) | 수정 응답 검증 |
 | [`081`](https://github.com/tbafe26/REST4/commit/081) | 🔴 댓글 작성 테스트(201-1, data 검증) | 테스트 먼저 작성 |
 | [`082`](https://github.com/tbafe26/REST4/commit/082) | [실험] 댓글 작성 구현(flush 없음) | 쓰기 지연, IDENTITY 와 INSERT 시점 |
+| [`083`](https://github.com/tbafe26/REST4/commit/083) | 🟢 `postService.flush()` 로 즉시 INSERT | flush, 영속성 컨텍스트 동기화 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1183,3 +1194,20 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 댓글은 `post.addComment()` 로 컬렉션에 추가되고 cascade 에 의해 저장됩니다. 이렇게 저장되는 엔티티는 **언제 INSERT 가 실행되는지**에 따라 응답 시점의 `id` 값이 달라질 수 있습니다. 그 결과를 확인하는 실험입니다.
 
 **확인** (test 프로파일로 서버 실행 후 `POST /api/v1/posts/1/comments`) 응답이 `{"resultCode":"201-1","msg":"0번 댓글이 작성되었습니다.","data":{"id":0,"createDate":null,"modifyDate":null,...}}` 입니다. 응답을 만드는 시점에는 아직 INSERT 가 실행되지 않아 id 와 생성일이 채워지지 않았습니다. 테스트(`댓글 작성`)도 `PostComment.getCreateDate()` 가 `null` 이라 실패합니다.
+
+#### 083 🟢 flush() 로 INSERT 를 즉시 실행
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/083) · [변경 내용](https://github.com/tbafe26/REST4/commit/083)
+
+**무엇을** `PostService.flush()`(→ `postRepository.flush()`) 를 추가하고, 댓글 작성 액션에서 댓글을 추가한 직후 호출합니다.
+
+```java
+PostComment postComment = postService.writeComment(post, reqBody.content);
+postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id 확정
+```
+
+**왜** `flush()` 는 영속성 컨텍스트에 쌓인 변경 사항을 **트랜잭션 커밋 전에** DB 로 보냅니다. INSERT 가 실행되면 DB 가 만든 id 가 엔티티에 채워지므로 응답에 올바른 댓글 번호를 담을 수 있습니다. 트랜잭션은 그대로 유지되어 이후 예외가 나면 함께 롤백됩니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"` — 댓글 작성 테스트가 통과해야 합니다.
+
+![🟢 flush() 적용 후 댓글 테스트 5개 모두 통과](docs/images/083.png)
+
