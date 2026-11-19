@@ -124,6 +124,7 @@ com.back
 | [`016`](https://github.com/tbafe26/REST4/commit/016) | 엔티티 필드명 원상복구 | 엔티티와 API 응답의 분리 필요성 |
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | [실험] PostDto 도입(getter 없음) | DTO, Jackson 직렬화는 getter 기반 |
 | [`018`](https://github.com/tbafe26/REST4/commit/018) | `fail-on-empty-beans` 설정 메모 | Jackson 직렬화 설정 |
+| [`019`](https://github.com/tbafe26/REST4/commit/019) | PostDto 에 @Getter | Lombok @Getter, 직렬화 대상 속성 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -357,3 +358,13 @@ public class PostDto {
 ```
 
 **확인** 설정 주석만 추가했으므로 동작 변화는 없습니다.
+
+
+#### 019 PostDto 에 @Getter 적용
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/019) · [변경 내용](https://github.com/tbafe26/REST4/commit/019)
+
+**무엇을** `PostDto` 에 `@Getter` 를 붙였고, 018 에서 남긴 Jackson 설정 주석은 지웠습니다.
+
+**왜** Jackson 이 값을 읽을 수 있도록 getter 를 만들어 주는 것이 정답입니다. 이제 응답 JSON 에 `id`, `createdDate`, `modifiedDate`, `subject`, `body` 가 담깁니다.
+
+**확인** `curl http://localhost:8080/api/v1/posts` 응답에 DTO 의 다섯 필드가 모두 보입니다.
