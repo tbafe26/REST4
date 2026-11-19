@@ -814,6 +814,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`063`](https://github.com/tbafe26/REST4/commit/063) | DB 재조회 검증 제거 | 컨트롤러 테스트의 범위 |
 | [`064`](https://github.com/tbafe26/REST4/commit/064) | 글 삭제 테스트(DELETE, 200-1) | delete() 요청 빌더 |
 | [`065`](https://github.com/tbafe26/REST4/commit/065) | 글 단건조회 테스트, 필드 형태(isNumber/isString) 검증 | 필수 검증 범위 |
+| [`066`](https://github.com/tbafe26/REST4/commit/066) | 단건조회 응답을 DB 값과 대조(선택) | 검증 강도 조절 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1025,5 +1026,15 @@ resultActions
 **무엇을** `t4`("글 단건조회") 를 추가했습니다. `GET /api/v1/posts/1` 응답에 `id`(숫자), `createDate`·`modifyDate`·`title`·`content`(문자열) 가 있는지 검증합니다.
 
 **왜** 컨트롤러 테스트에서 **필수**인 것은 "응답 JSON 의 각 필드가 존재하고 형태가 유효한가" 입니다. 이 정도만으로도 응답 스펙이 깨지는 것을 잡을 수 있습니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 066 글 단건조회 테스트 — 실제 DB 값과 대조
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/066) · [변경 내용](https://github.com/tbafe26/REST4/commit/066)
+
+**무엇을** 형태 검증을 실제 값 검증으로 바꿨습니다. `postService.findById(id)` 로 꺼낸 글의 id, 날짜(앞 20자리), 제목, 내용과 응답을 비교합니다.
+
+**왜** 형태만 맞고 엉뚱한 글이 올 수도 있습니다. DB 값과 대조하면 더 확실하지만, 이 정도까지 하는 것은 **선택**입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
