@@ -1430,6 +1430,7 @@ registry.addMapping("/api/**")
 | [`106`](https://github.com/tbafe26/REST4/commit/106) | 제약 위반 시 400, `400-1` 테스트 | 기존 핸들러 재사용 확인 |
 | [`107`](https://github.com/tbafe26/REST4/commit/107) | 🔴 `GET /api/v1/members/me?actorId=` 테스트, password 미노출 | 행위자(actorId), 민감 정보 비노출 |
 | [`108`](https://github.com/tbafe26/REST4/commit/108) | 🟢 `GET /me`, MemberDto(password 없음) | @RequestParam, 응답 DTO 로 민감 정보 차단 |
+| [`109`](https://github.com/tbafe26/REST4/commit/109) | 🔴 없는 회원 번호면 401, `401-1` 기대 | 인증 실패(401) |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1543,3 +1544,12 @@ public MemberDto me(@RequestParam int actorId) {
 **왜** 엔티티를 그대로 반환하면 `password` 까지 JSON 으로 나갑니다. 응답 전용 DTO 에서 필요한 필드만 고르면 민감 정보가 실수로 노출될 수 없습니다(1부에서 DTO 를 도입한 이유와 같습니다).
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 109 🔴 존재하지 않는 actorId 로 내 정보 → 401 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/109) · [변경 내용](https://github.com/tbafe26/REST4/commit/109)
+
+**무엇을** 존재할 수 없는 회원 번호(`Integer.MAX_VALUE`) 로 내 정보를 요청하는 테스트 `t5` 를 추가했습니다. 401(Unauthorized), `401-1`, `로그인 후 이용해주세요.` 가 와야 합니다.
+
+**왜** 지금은 `findById(...).get()` 이 `NoSuchElementException` 을 던져 **404** 로 응답합니다. 하지만 "행위자를 알 수 없다" 는 것은 데이터가 없는 것이 아니라 **인증이 안 된 것**이므로 401 이 맞습니다.
+
+**확인** `내 정보, 존재하지 않는 actorId` 테스트가 `Status expected:<401> but was:<404>` 로 실패합니다. `get()` 의 `NoSuchElementException` 이 404 로 처리되고 있습니다.
