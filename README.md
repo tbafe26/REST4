@@ -1225,6 +1225,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`091`](https://github.com/tbafe26/REST4/commit/091) | HomeController `produces = TEXT_HTML_VALUE` | 예외적인 응답 타입 지정 |
 | [`092`](https://github.com/tbafe26/REST4/commit/092) | HomeController 에 @Tag, @Operation | 문서 설명 보강 |
 | [`093`](https://github.com/tbafe26/REST4/commit/093) | ApiV1PostController 에 @Tag, @Operation | 문서 설명 보강 |
+| [`094`](https://github.com/tbafe26/REST4/commit/094) | ApiV1PostCommentController 에 @Tag, @Operation | 문서 설명 보강 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1326,3 +1327,15 @@ springdoc:
 **왜** 문서를 보는 프론트엔드 개발자가 메서드 이름(`getItems`, `write` …)을 해석하지 않아도 용도를 바로 알 수 있게 합니다.
 
 **확인** Swagger UI `apiV1` 그룹의 글 API 에 설명이 표시됩니다.
+
+#### 094 댓글 API 문서 꾸미기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/094) · [변경 내용](https://github.com/tbafe26/REST4/commit/094)
+
+**무엇을** `ApiV1PostCommentController` 에 `@Tag(description = "API 댓글 컨트롤러")`, 각 액션에 `@Operation(summary = ...)` 을 붙였습니다.
+
+**왜** 글 API 와 같은 수준으로 댓글 API 문서도 읽기 쉽게 만듭니다.
+
+**확인** Swagger UI `apiV1` 그룹의 댓글 API 에 설명이 표시됩니다.
+
+![@Tag, @Operation 설명이 붙은 글/댓글 API 문서](docs/images/094.png)
+
