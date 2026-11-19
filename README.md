@@ -24,14 +24,24 @@
 | 데이터 | Spring Data JPA, H2 (개발용 파일 DB / 테스트용 메모리 DB), H2 콘솔 |
 | 검증 | Bean Validation (spring-boot-starter-validation) |
 | 테스트 | JUnit 5, MockMvc, AssertJ, Hamcrest |
+| API 문서 | SpringDoc OpenAPI 3.2.0 (Swagger UI) |
 
 > 이후 단계에서 의존성이 늘어나면 이 표도 함께 갱신됩니다.
 
 실행:
 ```bash
-./gradlew bootRun    # 서버 실행 (기본 포트 8080)
-./gradlew test       # 테스트 실행
+./gradlew bootRun    # 서버 실행 (기본 포트 8080, dev 프로파일, 샘플 데이터 자동 생성)
+./gradlew test       # 테스트 실행 (test 프로파일, 메모리 DB)
 ```
+
+| 주소 | 설명 |
+|---|---|
+| http://localhost:8080/ | 메인 페이지 (서버 정보, API 문서 링크) |
+| http://localhost:8080/swagger-ui/index.html | API 문서 (Swagger UI, `apiV1` / `home` 그룹) |
+| http://localhost:8080/v3/api-docs | OpenAPI 명세 JSON |
+| http://localhost:8080/h2-console | H2 콘솔 (개발 DB) |
+
+- CORS 허용 출처(`/api/**`): `https://cdpn.io`, `http://localhost:3000`
 
 ## 커밋 따라가는 방법
 
@@ -70,6 +80,9 @@
 com.back
 ├─ BackApplication
 ├─ domain
+│  ├─ home
+│  │  └─ home
+│  │     └─ controller   HomeController (메인 페이지, fetch 실습)
 │  └─ post
 │     ├─ post
 │     │  ├─ controller   ApiV1PostController
@@ -83,9 +96,12 @@ com.back
 │        └─ entity       PostComment
 └─ global
    ├─ aspect             ResponseAspect (resultCode → HTTP 상태 코드)
+   ├─ globalExceptionHandler  GlobalExceptionHandler (예외 → RsData 응답)
    ├─ initData           BaseInitData (샘플 데이터)
    ├─ jpa.entity         BaseEntity
-   └─ rsData             RsData (공통 응답)
+   ├─ rsData             RsData (공통 응답)
+   ├─ springDoc          SpringDocConfig (API 문서 설정)
+   └─ webMvc             WebMvcConfig (CORS)
 ```
 
 도메인(`domain`)은 `기능/세부기능/계층` 순서로 나누고, 여러 도메인이 함께 쓰는 코드는 `global` 에 둡니다.
@@ -1230,6 +1246,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`096`](https://github.com/tbafe26/REST4/commit/096) | fetch 로 단건조회도 요청 | 여러 추가 요청 |
 | [`097`](https://github.com/tbafe26/REST4/commit/097) | `fetch("/api/v1/posts")` 상대 경로 | 출처(프로토콜·도메인·포트) |
 | [`098`](https://github.com/tbafe26/REST4/commit/098) | WebMvcConfig 로 `/api/**` CORS 허용 | 동일 출처 정책, CORS |
+| [`099`](https://github.com/tbafe26/REST4/commit/099) | allowedOrigins 에 `http://localhost:3000` 추가 | 허용 출처 명시 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1388,4 +1405,15 @@ registry.addMapping("/api/**")
 **확인** 허용한 출처의 페이지에서 `fetch("http://localhost:8080/api/v1/posts")` 를 호출하면 응답에 `Access-Control-Allow-Origin` 헤더가 붙습니다.
 
 ![localhost:3000 의 HTML 페이지에서 보낸 fetch 가 CORS 로 차단됨 (TypeError: Failed to fetch)](docs/images/098.png)
+
+#### 099 프론트엔드 개발 서버 출처도 CORS 허용
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/099) · [변경 내용](https://github.com/tbafe26/REST4/commit/099)
+
+**무엇을** CORS 허용 출처에 `http://localhost:3000` 을 추가했습니다. README 실행 방법에 API 문서 주소와 CORS 허용 출처를 정리했습니다.
+
+**왜** 프론트엔드 앱(예: 리액트 개발 서버)은 보통 다른 포트(3000)에서 실행되므로 백엔드와 출처가 다릅니다. 요청하는 주체(프론트 앱)의 출처를 **명시적으로** 하나씩 허용합니다. `*` 로 모두 허용하면 `allowCredentials(true)` 와 함께 쓸 수 없고 보안상으로도 좋지 않습니다.
+
+**확인** `localhost:3000` 에서 실행한 프론트 앱이 API 를 호출할 수 있습니다.
+
+![허용 출처에 localhost:3000 을 추가한 뒤 같은 요청이 성공](docs/images/099.png)
 
