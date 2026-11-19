@@ -798,6 +798,7 @@ public RsData(String resultCode, String msg, T data) {
 | 태그 | 내용 | 핵심 개념 |
 |---|---|---|
 | [`049`](https://github.com/tbafe26/REST4/commit/049) | ApiV1PostControllerTest, ApiV1PostCommentControllerTest 생성 | 컨트롤러 테스트 준비 |
+| [`050`](https://github.com/tbafe26/REST4/commit/050) | 글 작성 요청 테스트(MockMvc) | @SpringBootTest, @AutoConfigureMockMvc, @Transactional 롤백 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -807,3 +808,31 @@ public RsData(String resultCode, String msg, T data) {
 **왜** 지금까지는 기능을 만든 뒤 curl 로 손수 확인했습니다. 여기서부터는 **테스트 코드로 요청을 보내고 결과를 검증**합니다. 테스트가 있으면 이후 공통 코드를 바꿀 때도 기존 기능이 깨졌는지 즉시 알 수 있습니다. 컨트롤러 테스트는 언제나 "1. 요청을 보낸다 → 2. 응답을 검증한다" 두 단계로 이루어집니다.
 
 **확인** 테스트 클래스만 생겼고 테스트 메서드는 아직 없습니다.
+
+
+#### 050 글 작성 테스트 — MockMvc 로 POST 요청 보내기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/050) · [변경 내용](https://github.com/tbafe26/REST4/commit/050)
+
+**무엇을** `ApiV1PostControllerTest` 에 글 작성 테스트 `t1` 을 추가했습니다. `MockMvc` 로 `POST /api/v1/posts` 에 JSON 본문을 보냅니다. 아직 검증은 없습니다.
+
+```java
+@ActiveProfiles("test")  // 메모리 DB 를 쓰는 test 프로파일
+@SpringBootTest          // 애플리케이션 전체를 띄운다
+@AutoConfigureMockMvc    // 서버 없이 HTTP 요청을 흉내 내는 MockMvc 준비
+@Transactional           // 테스트가 끝나면 롤백 → 테스트끼리 데이터가 섞이지 않음
+public class ApiV1PostControllerTest {
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    @DisplayName("글 작성")
+    void t1() throws Exception {
+        mvc.perform(post("/api/v1/posts").contentType(MediaType.APPLICATION_JSON)
+                .content("""{ "title": "제목", "content": "내용" }"""));
+    }
+}
+```
+
+**왜** 실제 톰캣을 띄우지 않고도 Postman 처럼 요청을 보낼 수 있어야 테스트가 빠르고 반복 가능합니다. `@Transactional` 덕분에 테스트에서 만든 글은 롤백되어 다른 테스트에 영향을 주지 않습니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
