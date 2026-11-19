@@ -60,6 +60,7 @@
 | [`015`](https://github.com/tbafe26/REST4/commit/015) | 엔티티 필드명 `title`/`content` → `subject`/`body` | 응답 키가 `subject`, `body` 로 바뀌고, 댓글까지 키가 `body` 로 바뀜 |
 | [`017`](https://github.com/tbafe26/REST4/commit/017) | getter 없는 `PostDto` 반환 | 오류 없이 빈 객체가 응답됨: 다건 `[{},{},{}]`, 단건 `{}` |
 | [`024`](https://github.com/tbafe26/REST4/commit/024) | `@Transactional` 없이 댓글 삭제 | "1번 댓글이 삭제되었습니다." 응답 후에도 댓글이 그대로 남아 있음 |
+| [`030`](https://github.com/tbafe26/REST4/commit/030) | 댓글 전용 `RsData` 로 글 삭제 응답 | 컴파일 오류: `PostDto cannot be converted to PostCommentDto` |
 
 ## 패키지 구조
 
@@ -136,6 +137,7 @@ com.back
 | [`027`](https://github.com/tbafe26/REST4/commit/027) | RsData(resultCode, msg) record | 공통 응답 객체 |
 | [`028`](https://github.com/tbafe26/REST4/commit/028) | RsData 에 data(PostCommentDto) 추가 | 부가 데이터 응답 |
 | [`029`](https://github.com/tbafe26/REST4/commit/029) | 글 삭제(GET 임시) | CascadeType.REMOVE |
+| [`030`](https://github.com/tbafe26/REST4/commit/030) | [실험] 글 삭제 응답에 RsData 재사용 | 타입이 고정된 공통 응답의 한계 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -508,3 +510,13 @@ public record RsData(String resultCode, String msg) { }
 **왜** 글에는 댓글이 딸려 있지만 `Post.comments` 에 `CascadeType.REMOVE` 가 걸려 있어서, 글을 지우면 JPA 가 관련 댓글을 **먼저** 삭제한 뒤 글을 삭제합니다. 외래키 제약 때문에 직접 댓글을 지울 필요가 없습니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts/1/delete` 후 SQL 로그에 댓글 DELETE 들이 글 DELETE 보다 먼저 찍힙니다.
+
+
+#### 030 [실험] 글 삭제 응답에 댓글 전용 RsData 재사용
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/030) · [변경 내용](https://github.com/tbafe26/REST4/commit/030)
+
+**무엇을** 글 삭제도 `resultCode`, `msg`, `data` 형태로 응답하려고 `RsData` 를 그대로 썼습니다. `data` 에는 `PostDto` 를 넣었습니다.
+
+**왜** 지금 `RsData.data` 의 타입은 `PostCommentDto` 로 고정되어 있습니다. 공통 응답 객체가 특정 타입에 묶여 있으면 다른 리소스에 재사용할 수 없다는 것을 확인하는 실험입니다.
+
+**확인** `./gradlew compileJava` 가 `error: incompatible types: PostDto cannot be converted to PostCommentDto` 로 **컴파일 단계에서 실패**합니다. 타입이 고정된 공통 응답 객체는 다른 리소스에 재사용할 수 없습니다.
