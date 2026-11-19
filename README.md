@@ -1448,6 +1448,7 @@ registry.addMapping("/api/**")
 | [`124`](https://github.com/tbafe26/REST4/commit/124) | 🔴 글 수정: 작성자 성공, 타인 403, actorId 없음 401 | 같은 권한 규칙을 수정에 |
 | [`125`](https://github.com/tbafe26/REST4/commit/125) | 🟢 `post.checkActorCanModify(actor)` | 수정 권한 검사 |
 | [`126`](https://github.com/tbafe26/REST4/commit/126) | 🔴 댓글 삭제: 작성자 성공, 타인 403, actorId 없음 401 | 같은 규칙을 댓글에 |
+| [`127`](https://github.com/tbafe26/REST4/commit/127) | 🟢 `postComment.checkActorCanDelete(actor)` | 댓글 삭제 권한 검사 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1772,3 +1773,12 @@ public void checkActorCanDelete(Member actor) {
 **왜** 댓글도 작성자 본인만 삭제할 수 있어야 합니다. 글의 작성자가 아니라 **댓글의 작성자**가 기준입니다.
 
 **확인** `댓글 삭제, 작성자가 아닌 회원` 은 `Status expected:<403> but was:<200>`, `댓글 삭제, actorId 없음` 은 `Status expected:<401> but was:<200>` 으로 실패합니다. 지금은 누구든 삭제할 수 있습니다. 작성자 본인 테스트는 통과합니다.
+
+#### 127 🟢 작성자 외 댓글 삭제 차단
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/127) · [변경 내용](https://github.com/tbafe26/REST4/commit/127)
+
+**무엇을** `PostComment.checkActorCanDelete(actor)` 를 추가하고, 댓글 삭제 액션이 행위자 확인(401) → 글·댓글 조회 → 삭제 권한 확인(403) → 삭제 순서로 동작하게 했습니다.
+
+**왜** 126 의 테스트를 통과시키는 구현입니다. 글과 같은 방식(엔티티가 권한을 판단, 전역 핸들러가 403 응답)을 댓글에 적용합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
