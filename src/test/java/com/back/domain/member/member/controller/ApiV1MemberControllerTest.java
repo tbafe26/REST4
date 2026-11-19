@@ -1,5 +1,7 @@
 package com.back.domain.member.member.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import org.hamcrest.Matchers;
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
@@ -125,5 +127,42 @@ public class ApiV1MemberControllerTest {
                         password-Size-size must be between 8 and 30
                         username-Size-size must be between 4 and 30
                         """.stripIndent().trim()));
+    }
+
+    @Test
+    @DisplayName("내 정보")
+    void t4() throws Exception {
+        mvc
+                .perform(
+                        post("/api/v1/members/join")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "username": "user10",
+                                            "password": "12345678",
+                                            "name": "유저10"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        Member member = memberService.findLatest().get();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me?actorId=%d".formatted(member.getId()))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1MemberController.class))
+                .andExpect(handler().methodName("me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(member.getId()))
+                .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(member.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(member.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.username").value(member.getUsername()))
+                .andExpect(jsonPath("$.name").value(member.getName()))
+                .andExpect(jsonPath("$.password").doesNotExist()); // 비밀번호는 응답에 절대 포함되지 않아야 한다
     }
 }

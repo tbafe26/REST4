@@ -1428,6 +1428,7 @@ registry.addMapping("/api/**")
 | [`104`](https://github.com/tbafe26/REST4/commit/104) | 🟢 중복 검사 + MemberDuplicateUsernameException → 409-1 | 의미 있는 예외 클래스, 예외 핸들러 |
 | [`105`](https://github.com/tbafe26/REST4/commit/105) | 🔵 `findByUsername(...).ifPresent(_ -> throw)` | Optional, 이름 없는 변수 `_` |
 | [`106`](https://github.com/tbafe26/REST4/commit/106) | 제약 위반 시 400, `400-1` 테스트 | 기존 핸들러 재사용 확인 |
+| [`107`](https://github.com/tbafe26/REST4/commit/107) | 🔴 `GET /api/v1/members/me?actorId=` 테스트, password 미노출 | 행위자(actorId), 민감 정보 비노출 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1515,3 +1516,12 @@ memberRepository.findByUsername(username)
 **왜** 글 작성에서 만든 `MethodArgumentNotValidException` 핸들러가 회원가입에도 그대로 적용되는지 확인합니다. 구현 변경 없이 통과해야 하므로 🔴 가 아니라 테스트만 추가한 커밋입니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 107 🔴 내 정보 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/107) · [변경 내용](https://github.com/tbafe26/REST4/commit/107)
+
+**무엇을** 내 정보 테스트 `t4` 를 추가했습니다. 회원가입 후 그 회원 번호로 `GET /api/v1/members/me?actorId={번호}` 를 요청하면 200 과 함께 `id`, `createDate`, `modifyDate`, `username`, `name` 이 와야 하고, **`password` 는 없어야** 합니다.
+
+**왜** 로그인 기능이 없으므로 "누가 요청했는지" 는 `actorId` 쿼리 파라미터로 표현합니다. 응답에 비밀번호가 섞여 나가는 실수를 막기 위해 `jsonPath("$.password").doesNotExist()` 로 명시적으로 검증합니다.
+
+**확인** `내 정보` 테스트가 `Handler type expected:<ApiV1MemberController> but was:<ResourceHttpRequestHandler>` 로 실패합니다. `/me` 매핑이 없어 정적 리소스 처리기가 요청을 받았습니다.
