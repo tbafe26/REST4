@@ -1437,6 +1437,7 @@ registry.addMapping("/api/**")
 | [`113`](https://github.com/tbafe26/REST4/commit/113) | 🔴 샘플 회원 6명(system, admin, user1~4) 기대 | 샘플 데이터도 테스트로 고정 |
 | [`114`](https://github.com/tbafe26/REST4/commit/114) | 🟢 BaseInitData 에 회원 생성(work1) 추가, 글/댓글은 work2 | 초기 데이터 순서 |
 | [`115`](https://github.com/tbafe26/REST4/commit/115) | 🔴 글/댓글 응답에 authorId, authorName 기대 | 연관관계 추가 전 요구 고정 |
+| [`116`](https://github.com/tbafe26/REST4/commit/116) | 🟢 Post.author, PostComment.author(@ManyToOne LAZY), DTO 에 authorId/authorName | 다대일 연관관계, 생성 시 필수 값 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1631,3 +1632,19 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** "모든 글과 댓글은 작성자를 가진다" 는 요구를 응답 기준으로 먼저 정의합니다. 회원 번호는 하드코딩하지 않고 `findByUsername` 으로 조회해 비교합니다.
 
 **확인** 두 테스트 모두 실패합니다. 글: `No value at JSON path "$.authorId"`, 댓글: `No value at JSON path "$[0].authorId"`. 아직 작성자 정보가 없습니다.
+
+#### 116 🟢 글과 댓글에 작성자(author) 연관관계 추가
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/116) · [변경 내용](https://github.com/tbafe26/REST4/commit/116)
+
+**무엇을**
+- `Post`, `PostComment` 에 `@ManyToOne(fetch = LAZY) Member author` 를 추가하고 생성자에서 받도록 했습니다(`new Post(author, title, content)`, `post.addComment(author, content)`).
+- `PostService.write(author, ...)`, `writeComment(author, post, ...)` 로 시그니처를 바꿨습니다.
+- `PostDto`, `PostCommentDto` 에 `authorId`, `authorName` 을 추가했습니다.
+- 샘플 글/댓글을 정해진 작성자로 만듭니다.
+- 테스트 파일의 import 그룹 사이 빈 줄을 정리했습니다.
+
+**왜** "모든 글과 댓글은 작성자를 가진다" 를 만족시키려면 생성 시점에 작성자를 반드시 받아야 합니다. 생성자 인자로 강제하면 작성자 없는 글을 만들 수 없습니다. 작성자는 목록 조회마다 필요하지 않을 수 있어 `LAZY` 로 둡니다.
+
+> **임시 처리** 아직 API 요청에서 행위자를 받는 수단이 없어서, API 로 작성하는 글/댓글은 잠시 `system` 회원을 작성자로 둡니다. 다음 단계에서 `actorId` 로 바꿉니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest" --tests "*ApiV1PostCommentControllerTest"`

@@ -1,5 +1,7 @@
 package com.back.domain.post.postComment.controller;
 
+import com.back.domain.member.member.entity.Member;
+import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import com.back.domain.post.postComment.dto.PostCommentDto;
@@ -22,6 +24,7 @@ import java.util.List;
 @Tag(name = "ApiV1PostCommentController", description = "API 댓글 컨트롤러")
 public class ApiV1PostCommentController {
     private final PostService postService;
+    private final MemberService memberService;
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -112,7 +115,10 @@ public class ApiV1PostCommentController {
     ) {
         Post post = postService.findById(postId).get();
 
-        PostComment postComment = postService.writeComment(post, reqBody.content);
+        // 아직 행위자를 받을 수단이 없으므로 임시로 system 회원을 작성자로 둔다
+        Member author = memberService.findByUsername("system").get();
+
+        PostComment postComment = postService.writeComment(author, post, reqBody.content);
 
         postService.flush();
 
