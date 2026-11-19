@@ -791,3 +791,19 @@ public RsData(String resultCode, String msg, T data) {
 **왜** 글 수정과 같은 규칙(PUT, ReqBody, RsData)으로 댓글도 수정할 수 있게 해서 글/댓글 CRUD 를 완성합니다.
 
 **확인** `curl -X PUT http://localhost:8080/api/v1/posts/1/comments/1 -H "Content-Type: application/json" -d '{"content":"댓글new"}'`
+
+
+### 2부. REST API by TDD (049 ~ 083)
+
+| 태그 | 내용 | 핵심 개념 |
+|---|---|---|
+| [`049`](https://github.com/tbafe26/REST4/commit/049) | ApiV1PostControllerTest, ApiV1PostCommentControllerTest 생성 | 컨트롤러 테스트 준비 |
+
+#### 049 컨트롤러 테스트 클래스 생성
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
+
+**무엇을** 빈 테스트 클래스 `ApiV1PostControllerTest`, `ApiV1PostCommentControllerTest` 를 테스트 쪽에 컨트롤러와 같은 패키지로 만들고, 기본 생성된 `BackApplicationTests` 는 지웠습니다.
+
+**왜** 지금까지는 기능을 만든 뒤 curl 로 손수 확인했습니다. 여기서부터는 **테스트 코드로 요청을 보내고 결과를 검증**합니다. 테스트가 있으면 이후 공통 코드를 바꿀 때도 기존 기능이 깨졌는지 즉시 알 수 있습니다. 컨트롤러 테스트는 언제나 "1. 요청을 보낸다 → 2. 응답을 검증한다" 두 단계로 이루어집니다.
+
+**확인** 테스트 클래스만 생겼고 테스트 메서드는 아직 없습니다.
