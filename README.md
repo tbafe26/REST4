@@ -67,6 +67,7 @@
 | [`005`](https://github.com/tbafe26/REST4/commit/005) | BaseEntity(id, 생성/수정 시각) + @EnableJpaAuditing | @MappedSuperclass, Auditing |
 | [`006`](https://github.com/tbafe26/REST4/commit/006) | Post, PostComment 엔티티(1:N, cascade, orphanRemoval) | 연관관계 매핑, cascade |
 | [`007`](https://github.com/tbafe26/REST4/commit/007) | PostRepository, PostService | Spring Data JPA, 서비스 계층 |
+| [`008`](https://github.com/tbafe26/REST4/commit/008) | 샘플 데이터(글 3, 댓글 5) 생성 | ApplicationRunner, 자기 주입 @Lazy |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -147,3 +148,18 @@ private final List<PostComment> comments = new ArrayList<>();
 **왜** 컨트롤러가 저장소를 직접 만지지 않고 서비스를 거치게 하는 계층 구조의 시작입니다. `JpaRepository` 를 상속하면 CRUD 구현 없이 `save`, `findById`, `findAll` 을 쓸 수 있습니다.
 
 **확인** `./gradlew test` 통과.
+
+#### 008 샘플 데이터 (글 3개, 댓글 5개)
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/008) · [변경 내용](https://github.com/tbafe26/REST4/commit/008)
+
+**무엇을** `BaseInitData` 의 `ApplicationRunner` 가 서버 시작 시 글 3개와 댓글 5개(1번 글 3개, 2번 글 2개)를 만듭니다. 이미 글이 있으면 건너뜁니다.
+
+**왜** API 를 만들기 전에 눈으로 확인할 데이터가 필요합니다. 파일 DB 를 쓰므로 `count() > 0` 검사로 재시작해도 중복 생성되지 않게 합니다. 실제 저장 작업은 `@Transactional` 이 붙은 `work1()` 에서 하는데, 같은 클래스 안에서 직접 호출하면 프록시를 거치지 않아 트랜잭션이 적용되지 않으므로 `@Lazy` 로 자기 자신(프록시)을 주입해 `self.work1()` 로 부릅니다.
+
+```java
+@Autowired
+@Lazy
+private BaseInitData self;
+```
+
+**확인** `./gradlew test` 통과. 서버 시작 로그에 글 3건, 댓글 5건의 `insert` SQL 이 출력됩니다.
