@@ -1219,6 +1219,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`085`](https://github.com/tbafe26/REST4/commit/085) | SpringDocConfig(@Configuration, @OpenAPIDefinition) | 문서 설정 클래스 |
 | [`086`](https://github.com/tbafe26/REST4/commit/086) | `@OpenAPIDefinition(info = @Info(...))` | 문서 메타 정보 |
 | [`087`](https://github.com/tbafe26/REST4/commit/087) | `GET /` 메인 페이지(서버 정보, 문서 링크) | 접속 안내 페이지 |
+| [`088`](https://github.com/tbafe26/REST4/commit/088) | `apiV1`(/api/v1/**) 과 `home`(그 외) 그룹 | GroupedOpenApi |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1259,4 +1260,15 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 **왜** 프론트엔드 개발자가 서버 주소로 접속했을 때 빈 404 화면 대신 문서로 바로 갈 수 있는 안내가 있으면 편리합니다. 호스트 정보는 여러 서버 중 어디에 붙었는지 확인하는 데 쓰입니다.
 
 **확인** http://localhost:8080/ 접속 시 안내 페이지가 보입니다.
+
+#### 088 GroupedOpenApi 로 문서 그룹 나누기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/088) · [변경 내용](https://github.com/tbafe26/REST4/commit/088)
+
+**무엇을** `GroupedOpenApi` 빈 두 개를 등록했습니다. `apiV1` 그룹은 `/api/v1/**`, `home` 그룹은 `/api/**` 를 제외한 나머지 경로를 보여 줍니다.
+
+**왜** API 버전이 늘어나면(`/api/v2/...`) 한 화면에 모두 섞이게 됩니다. 버전별로, 그리고 API 가 아닌 것(메인 페이지 등)을 따로 묶어 두면 문서를 찾기 쉽습니다.
+
+**확인** Swagger UI 오른쪽 위 그룹 선택에서 `apiV1`, `home` 을 고를 수 있습니다.
+
+![오른쪽 위 Select a definition 에서 apiV1 / home 그룹을 고를 수 있다](docs/images/088.png)
 
