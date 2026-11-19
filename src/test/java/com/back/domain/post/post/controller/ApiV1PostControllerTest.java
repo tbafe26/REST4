@@ -37,9 +37,11 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 작성")
     void t1() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts")
+                        post("/api/v1/posts?actorId=%d".formatted(actor.getId()))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -61,6 +63,8 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.data.id").value(post.getId()))
                 .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.authorId").value(actor.getId()))
+                .andExpect(jsonPath("$.data.authorName").value(actor.getName()))
                 .andExpect(jsonPath("$.data.title").value("제목"))
                 .andExpect(jsonPath("$.data.content").value("내용"));
     }
@@ -279,5 +283,53 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$.authorId").value(author.getId()))
                     .andExpect(jsonPath("$.authorName").value(author.getName()));
         }
+    }
+
+    @Test
+    @DisplayName("글 작성, actorId 없음")
+    void t11() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
+    }
+
+    @Test
+    @DisplayName("글 작성, 존재하지 않는 actorId")
+    void t12() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts?actorId=%d".formatted(Integer.MAX_VALUE))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
     }
 }
