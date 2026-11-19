@@ -12,6 +12,12 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
 
+    public Member join(String username, String password, String name) {
+        Member member = new Member(username, password, name);
+
+        return memberRepository.save(member);
+    }
+
     public Optional<Member> findLatest() {
         return memberRepository.findTopByOrderByIdDesc();
     }

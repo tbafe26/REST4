@@ -1423,6 +1423,7 @@ registry.addMapping("/api/**")
 |---|---|---|
 | [`100`](https://github.com/tbafe26/REST4/commit/100) | Member 엔티티(username 유니크), Repository/Service/Controller 뼈대 | 새 도메인 추가, 유니크 제약 |
 | [`101`](https://github.com/tbafe26/REST4/commit/101) | 🔴 `POST /api/v1/members/join` 성공 테스트(201-1) | 테스트 먼저 작성 |
+| [`102`](https://github.com/tbafe26/REST4/commit/102) | 🟢 회원가입 구현, MemberJoinReqBody 제약 | @Valid, RsData<Void> |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1443,3 +1444,21 @@ registry.addMapping("/api/**")
 **왜** 기능을 만들기 전에 "어떤 요청에 어떤 응답이 와야 하는지" 를 테스트로 고정합니다. 이 테스트를 통과시키는 것이 다음 단계의 목표입니다.
 
 **확인** `회원가입` 테스트가 `NoSuchElementException: No value present` 로 실패합니다. 가입 API 가 없어 회원이 저장되지 않았고, `findLatest()` 가 비어 있습니다.
+
+#### 102 🟢 회원가입 구현
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/102) · [변경 내용](https://github.com/tbafe26/REST4/commit/102)
+
+**무엇을** `POST /api/v1/members/join` 을 구현했습니다. 요청 본문 `MemberJoinReqBody` 는 `username`(4~30자), `password`(8~30자), `name`(2~30자) 제약을 가지며, `MemberService.join` 이 회원을 저장합니다. 응답은 `RsData<Void>`(`201-1`) 이므로 `ResponseAspect` 가 HTTP 상태를 201 로 바꿉니다.
+
+```java
+@PostMapping("/join")
+@Transactional
+public RsData<Void> join(@RequestBody @Valid MemberJoinReqBody reqBody) {
+    Member member = memberService.join(reqBody.username, reqBody.password, reqBody.name);
+    return new RsData<>("201-1", "%s님 환영합니다. 회원가입이 완료되었습니다.".formatted(member.getName()));
+}
+```
+
+**왜** 101 의 테스트를 통과시키는 최소 구현입니다. 글 API 에서 만든 규칙(ReqBody + `@Valid`, `RsData`, resultCode 로 상태 코드 결정)을 그대로 따릅니다.
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
