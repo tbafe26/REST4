@@ -1224,6 +1224,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`090`](https://github.com/tbafe26/REST4/commit/090) | `springdoc.default-produces-media-type` 설정 | 설정으로 일괄 적용 |
 | [`091`](https://github.com/tbafe26/REST4/commit/091) | HomeController `produces = TEXT_HTML_VALUE` | 예외적인 응답 타입 지정 |
 | [`092`](https://github.com/tbafe26/REST4/commit/092) | HomeController 에 @Tag, @Operation | 문서 설명 보강 |
+| [`093`](https://github.com/tbafe26/REST4/commit/093) | ApiV1PostController 에 @Tag, @Operation | 문서 설명 보강 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1316,3 +1317,12 @@ springdoc:
 **왜** 문서에는 기본적으로 클래스/메서드 이름만 나옵니다. 사람이 읽는 설명을 붙여 문서만 보고도 각 API 의 용도를 알 수 있게 합니다.
 
 **확인** Swagger UI 에 "홈 컨트롤러", "메인 페이지" 설명이 표시됩니다.
+
+#### 093 글 API 문서 꾸미기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/093) · [변경 내용](https://github.com/tbafe26/REST4/commit/093)
+
+**무엇을** `ApiV1PostController` 에 `@Tag(description = "API 글 컨트롤러")`, 각 액션에 `@Operation(summary = "다건 조회" / "단건 조회" / "삭제" / "작성" / "수정")` 을 붙였습니다.
+
+**왜** 문서를 보는 프론트엔드 개발자가 메서드 이름(`getItems`, `write` …)을 해석하지 않아도 용도를 바로 알 수 있게 합니다.
+
+**확인** Swagger UI `apiV1` 그룹의 글 API 에 설명이 표시됩니다.
