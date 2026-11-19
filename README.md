@@ -805,6 +805,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`054`](https://github.com/tbafe26/REST4/commit/054) | 글 수정 테스트(PUT, 200) | put() 요청 빌더 |
 | [`055`](https://github.com/tbafe26/REST4/commit/055) | ResponseAspect 포인트컷을 RsData 반환 메서드로 한정 | 포인트컷, 테스트가 리팩터링의 안전망 |
 | [`056`](https://github.com/tbafe26/REST4/commit/056) | `handler().handlerType/methodName` 검증 | 요청 매핑 검증 |
+| [`057`](https://github.com/tbafe26/REST4/commit/057) | 최신 글·전체 글 수를 DB 에서 조회해 응답과 대조 | jsonPath, 쿼리 메서드 findFirstByOrderByIdDesc |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -915,5 +916,26 @@ resultActions
 **무엇을** 글 작성 테스트에 `handler().handlerType(ApiV1PostController.class)`, `handler().methodName("write")` 검증을 추가했습니다.
 
 **왜** 상태 코드만 맞아도 엉뚱한 메서드가 요청을 처리했을 수 있습니다. 의도한 컨트롤러의 의도한 액션이 실행됐는지까지 확인합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 057 글 작성 응답을 DB 데이터와 대조
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/057) · [변경 내용](https://github.com/tbafe26/REST4/commit/057)
+
+**무엇을** `PostRepository.findFirstByOrderByIdDesc()`, `PostService.findLatest()` 를 추가했습니다. 테스트에서는 요청 후 가장 최근 글과 전체 글 수를 DB 에서 꺼내 `resultCode`, `msg`, `data.totalCount`, `data.post.id` 를 대조합니다.
+
+**왜** 상태 코드만으로는 응답 본문이 맞는지 알 수 없습니다. "방금 만든 글" 을 DB 에서 꺼내 응답 값과 비교하면 응답이 실제 저장 결과를 정확히 반영하는지 확인됩니다.
+
+```java
+Post post = postService.findLatest().get();
+long totalCount = postService.count();
+
+resultActions
+        .andExpect(jsonPath("$.resultCode").value("201-1"))
+        .andExpect(jsonPath("$.msg").value("%d번 글이 작성되었습니다.".formatted(post.getId())))
+        .andExpect(jsonPath("$.data.totalCount").value(totalCount))
+        .andExpect(jsonPath("$.data.post.id").value(post.getId()));
+```
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
