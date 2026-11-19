@@ -143,6 +143,7 @@ com.back
 | [`033`](https://github.com/tbafe26/REST4/commit/033) | RsData<T> 제네릭, 글 삭제는 RsData<PostDto> | 제네릭으로 타입 안정성 확보 |
 | [`034`](https://github.com/tbafe26/REST4/commit/034) | 댓글 삭제 RsData<PostCommentDto> | raw 타입 지양 |
 | [`035`](https://github.com/tbafe26/REST4/commit/035) | 삭제 응답 RsData<Void>, data 없는 생성자 | Void 타입 인자 |
+| [`036`](https://github.com/tbafe26/REST4/commit/036) | 글/댓글 삭제 → `DELETE /{id}` | HTTP 메서드의 의미 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -585,3 +586,15 @@ public RsData(String resultCode, String msg) {
 ```
 
 **확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":null}` 입니다.
+
+
+#### 036 삭제는 DELETE 메서드로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/036) · [변경 내용](https://github.com/tbafe26/REST4/commit/036)
+
+**무엇을** 임시로 `GET /{id}/delete` 였던 글/댓글 삭제를 `@DeleteMapping("/{id}")` 로 바꿨습니다.
+- `DELETE /api/v1/posts/{id}`
+- `DELETE /api/v1/posts/{postId}/comments/{id}`
+
+**왜** REST 에서는 **주소(URL)는 리소스**를, **HTTP 메서드는 행위**를 나타냅니다. GET 은 조회용이라 브라우저 미리 불러오기, 크롤러, 캐시 등에 의해 의도치 않게 호출될 수 있어 상태를 바꾸는 요청에 쓰면 위험합니다.
+
+**확인** `curl -X DELETE http://localhost:8080/api/v1/posts/1/comments/1`
