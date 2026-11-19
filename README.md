@@ -820,6 +820,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`069`](https://github.com/tbafe26/REST4/commit/069) | 🔴 없는 글 조회 시 404, `404-1` 기대 | 실패 시나리오 테스트 |
 | [`070`](https://github.com/tbafe26/REST4/commit/070) | 🟢 GlobalExceptionHandler 로 NoSuchElementException 처리 | @ControllerAdvice, @ExceptionHandler |
 | [`071`](https://github.com/tbafe26/REST4/commit/071) | @RestControllerAdvice + @ResponseStatus(NOT_FOUND) | 예외 응답 상태 코드 지정 방법 A |
+| [`072`](https://github.com/tbafe26/REST4/commit/072) | ResponseEntity 방식 + @ControllerAdvice | 예외 응답 상태 코드 지정 방법 B |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1111,3 +1112,20 @@ public class GlobalExceptionHandler {
 **왜** `@RestControllerAdvice = @ControllerAdvice + @ResponseBody` 입니다(`@RestController` 와 같은 관계). 예외 핸들러는 `ResponseAspect` 가 상태 코드를 바꿔 주지 않으므로 `@ResponseStatus` 로 직접 지정합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"` — 404 테스트(`t6`)가 통과해야 합니다.
+
+
+#### 072 ResponseEntity 로 예외 응답 상태 코드 지정
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/072) · [변경 내용](https://github.com/tbafe26/REST4/commit/072)
+
+**무엇을** 핸들러가 `ResponseEntity<RsData<Void>>` 를 반환하며 `NOT_FOUND` 를 함께 담도록 바꿨습니다. `ResponseEntity` 는 그 자체로 응답 본문이 되므로 다시 `@ControllerAdvice` 로 돌렸습니다.
+
+**왜** `@ResponseStatus` 는 상태 코드가 고정이지만, `ResponseEntity` 는 예외 내용에 따라 상태 코드를 코드로 정할 수 있어 핸들러가 늘어날 때 유연합니다. 두 방법 모두 정답이며 이 프로젝트는 `ResponseEntity` 방식으로 이어갑니다.
+
+```java
+@ExceptionHandler(NoSuchElementException.class)
+public ResponseEntity<RsData<Void>> handle() {
+    return new ResponseEntity<>(new RsData<>("404-1", "해당 데이터가 존재하지 않습니다."), NOT_FOUND);
+}
+```
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
