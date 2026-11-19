@@ -810,6 +810,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`059`](https://github.com/tbafe26/REST4/commit/059) | 🔴 작성 응답 data 를 PostDto 로 기대하도록 테스트 수정 | 요구 변경 시 테스트 먼저 |
 | [`060`](https://github.com/tbafe26/REST4/commit/060) | 🟢 PostWriteResBody 제거, `RsData<PostDto>` | Red → Green |
 | [`061`](https://github.com/tbafe26/REST4/commit/061) | 글 수정 테스트에 handler, resultCode, msg 검증 | 응답 본문 검증 |
+| [`062`](https://github.com/tbafe26/REST4/commit/062) | 수정 후 DB 값 assertThat 검증(선택) | AssertJ |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -981,5 +982,15 @@ resultActions
 **무엇을** 글 수정 테스트에서 대상 id 를 변수로 빼고, `handler()`(modify), `resultCode`(`200-1`), `msg` 검증을 추가했습니다.
 
 **왜** 글 작성 테스트와 같은 수준으로 응답 본문까지 검증해야 수정 API 의 스펙이 테스트로 고정됩니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 062 글 수정 결과가 DB 에 반영됐는지까지 확인
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/062) · [변경 내용](https://github.com/tbafe26/REST4/commit/062)
+
+**무엇을** 수정 요청 후 `postService.findById(id)` 로 글을 다시 조회해 제목/내용이 바뀌었는지 `assertThat` 으로 확인합니다.
+
+**왜** 응답이 "수정되었습니다" 라고 해도 실제 저장이 안 됐을 수 있습니다. DB 까지 확인하는 것은 더 확실하지만, 컨트롤러 테스트의 필수 범위는 아닙니다(선택 사항).
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
