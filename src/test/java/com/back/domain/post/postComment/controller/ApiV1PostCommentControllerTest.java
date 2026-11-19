@@ -96,10 +96,11 @@ public class ApiV1PostCommentControllerTest {
     void t3() throws Exception {
         int postId = 1;
         int id = 1;
+        Member actor = memberService.findByUsername("user1").get(); // 1번 글/댓글의 작성자
 
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                        delete("/api/v1/posts/%d/comments/%d?actorId=%d".formatted(postId, id, actor.getId()))
                 )
                 .andDo(print());
 
@@ -248,6 +249,47 @@ public class ApiV1PostCommentControllerTest {
         resultActions
                 .andExpect(handler().handlerType(ApiV1PostCommentController.class))
                 .andExpect(handler().methodName("write"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"))
+                .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제, 작성자가 아닌 회원")
+    void t9() throws Exception {
+        int postId = 1;
+        int id = 1;
+        Member actor = memberService.findByUsername("user2").get(); // 작성자(user1)가 아님
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d?actorId=%d".formatted(postId, id, actor.getId()))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.msg").value("권한이 없습니다."));
+    }
+
+    @Test
+    @DisplayName("댓글 삭제, actorId 없음")
+    void t10() throws Exception {
+        int postId = 1;
+        int id = 1;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
+                .andExpect(handler().methodName("delete"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-1"))
                 .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
