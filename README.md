@@ -1229,6 +1229,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`095`](https://github.com/tbafe26/REST4/commit/095) | `GET /test/fetchPosts` — 페이지가 API 를 추가 요청 | 브라우저 fetch, 추가 요청 |
 | [`096`](https://github.com/tbafe26/REST4/commit/096) | fetch 로 단건조회도 요청 | 여러 추가 요청 |
 | [`097`](https://github.com/tbafe26/REST4/commit/097) | `fetch("/api/v1/posts")` 상대 경로 | 출처(프로토콜·도메인·포트) |
+| [`098`](https://github.com/tbafe26/REST4/commit/098) | WebMvcConfig 로 `/api/**` CORS 허용 | 동일 출처 정책, CORS |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1368,3 +1369,23 @@ springdoc:
 **왜** 요청 대상이 문서를 받아 온 서버와 같다면 **프로토콜·도메인·포트**를 생략할 수 있습니다. 브라우저가 현재 페이지의 출처(origin)를 기준으로 주소를 완성합니다. 서버 주소가 바뀌어도 코드를 고칠 필요가 없습니다.
 
 **확인** 동작은 096 과 같습니다.
+
+#### 098 CORS 허용 — WebMvcConfig
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/098) · [변경 내용](https://github.com/tbafe26/REST4/commit/098)
+
+**무엇을** `global/webMvc/WebMvcConfig` 에서 `/api/**` 경로에 대해 `https://cdpn.io` 출처의 요청을 허용했습니다(메서드 GET/POST/PUT/DELETE/PATCH, 모든 헤더, 자격 증명 포함).
+
+**왜** 브라우저는 **동일 출처 정책** 때문에, 문서를 받아 온 서버와 출처가 다른 서버로 보낸 추가 요청의 응답을 기본적으로 스크립트에 넘겨주지 않습니다(예: 온라인 코드 편집기 페이지에서 `http://localhost:8080/api/v1/posts` 호출). 요청을 받는 서버가 "이 출처는 허용한다" 는 응답 헤더를 보내야 브라우저가 응답을 전달합니다. 그것이 CORS 설정입니다.
+
+```java
+registry.addMapping("/api/**")
+        .allowedOrigins("https://cdpn.io")
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+        .allowedHeaders("*")
+        .allowCredentials(true);
+```
+
+**확인** 허용한 출처의 페이지에서 `fetch("http://localhost:8080/api/v1/posts")` 를 호출하면 응답에 `Access-Control-Allow-Origin` 헤더가 붙습니다.
+
+![localhost:3000 의 HTML 페이지에서 보낸 fetch 가 CORS 로 차단됨 (TypeError: Failed to fetch)](docs/images/098.png)
+
