@@ -1439,6 +1439,7 @@ registry.addMapping("/api/**")
 | [`115`](https://github.com/tbafe26/REST4/commit/115) | 🔴 글/댓글 응답에 authorId, authorName 기대 | 연관관계 추가 전 요구 고정 |
 | [`116`](https://github.com/tbafe26/REST4/commit/116) | 🟢 Post.author, PostComment.author(@ManyToOne LAZY), DTO 에 authorId/authorName | 다대일 연관관계, 생성 시 필수 값 |
 | [`117`](https://github.com/tbafe26/REST4/commit/117) | 🔴 `POST /api/v1/posts?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 요구 변경 시 기존 테스트 먼저 수정 |
+| [`118`](https://github.com/tbafe26/REST4/commit/118) | 🟢 글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 행위자 = 작성자 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1658,3 +1659,19 @@ Member actor = memberService.findById(actorId).orElseThrow(
 **왜** 글 작성자는 요청한 행위자여야 합니다. 지금은 임시로 `system` 이 작성자라 `t1` 이 실패하고, 행위자 없이도 작성되어 `t11`, `t12` 도 실패합니다. 기존 기능의 요구가 바뀌었으므로 **기존 테스트부터** 고칩니다.
 
 **확인** 3개 테스트가 실패합니다. `글 작성`: `$.data.authorId expected:<3> but was:<1>`(user1 이 아니라 임시 작성자 system), `actorId 없음`/`존재하지 않는 actorId`: `Status expected:<401> but was:<201>`.
+
+#### 118 🟢 글 작성자를 actorId 행위자로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/118) · [변경 내용](https://github.com/tbafe26/REST4/commit/118)
+
+**무엇을** 글 작성 액션이 `@RequestParam(defaultValue = "0") int actorId` 를 받아 회원을 찾고, 없으면 `UnauthenticatedException`(401) 을 던집니다. 찾은 행위자를 작성자로 저장하며, 116 의 임시 `system` 작성자는 지웠습니다.
+
+```java
+Member actor = memberService.findById(actorId).orElseThrow(
+        UnauthenticatedException::new
+);
+Post post = postService.write(actor, reqBody.title, reqBody.content);
+```
+
+**왜** 117 의 테스트를 통과시키는 구현입니다. 내 정보 API 에서 만든 "누락·잘못된 actorId → 401" 규칙을 그대로 재사용합니다. 요청 본문 검증(`@Valid`)은 메서드 실행 전에 일어나므로 제목/내용 검증 실패 테스트(400)는 actorId 없이도 그대로 통과합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`

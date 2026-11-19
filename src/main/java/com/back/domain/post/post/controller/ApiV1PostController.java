@@ -5,6 +5,7 @@ import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import com.back.global.globalExceptionHandler.UnauthenticatedException;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -77,12 +78,14 @@ public class ApiV1PostController {
     @Transactional
     @Operation(summary = "작성")
     public RsData<PostDto> write(
+            @RequestParam(defaultValue = "0") int actorId,
             @RequestBody @Valid PostWriteReqBody reqBody
     ) {
-        // 아직 행위자를 받을 수단이 없으므로 임시로 system 회원을 작성자로 둔다
-        Member author = memberService.findByUsername("system").get();
+        Member actor = memberService.findById(actorId).orElseThrow(
+                UnauthenticatedException::new
+        );
 
-        Post post = postService.write(author, reqBody.title, reqBody.content);
+        Post post = postService.write(actor, reqBody.title, reqBody.content);
 
         return new RsData<>(
                 "201-1",
