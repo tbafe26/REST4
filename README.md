@@ -139,6 +139,7 @@ com.back
 | [`029`](https://github.com/tbafe26/REST4/commit/029) | 글 삭제(GET 임시) | CascadeType.REMOVE |
 | [`030`](https://github.com/tbafe26/REST4/commit/030) | [실험] 글 삭제 응답에 RsData 재사용 | 타입이 고정된 공통 응답의 한계 |
 | [`031`](https://github.com/tbafe26/REST4/commit/031) | ForPostRsData 임시 도입 | 타입별 응답 클래스의 중복 |
+| [`032`](https://github.com/tbafe26/REST4/commit/032) | ForPostRsData 제거, data 타입 Object | 범용화(Object)의 대가 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -531,3 +532,13 @@ public record RsData(String resultCode, String msg) { }
 **왜** 일단 동작하게 만드는 가장 단순한 방법입니다. 하지만 리소스가 늘 때마다 `ForXxxRsData` 가 늘어나는 구조라 오래 갈 수 없습니다.
 
 **확인** 글 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":{...}}` 형태입니다.
+
+
+#### 032 ForPostRsData 제거, RsData.data 를 Object 로
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/032) · [변경 내용](https://github.com/tbafe26/REST4/commit/032)
+
+**무엇을** `ForPostRsData` 를 지우고 `RsData.data` 의 타입을 `Object` 로 바꿔 글/댓글 삭제 모두 `RsData` 를 씁니다.
+
+**왜** `Object` 로 두면 어떤 데이터든 담을 수 있어 클래스 하나로 통합됩니다. 다만 메서드 시그니처만 보고는 `data` 에 무엇이 들어있는지 알 수 없고, 꺼내 쓸 때 형변환이 필요하다는 단점이 생깁니다.
+
+**확인** 글/댓글 삭제 응답 JSON 은 이전과 같습니다.
