@@ -1218,6 +1218,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`084`](https://github.com/tbafe26/REST4/commit/084) | springdoc-openapi-starter-webmvc-ui 의존성 | OpenAPI, Swagger UI |
 | [`085`](https://github.com/tbafe26/REST4/commit/085) | SpringDocConfig(@Configuration, @OpenAPIDefinition) | 문서 설정 클래스 |
 | [`086`](https://github.com/tbafe26/REST4/commit/086) | `@OpenAPIDefinition(info = @Info(...))` | 문서 메타 정보 |
+| [`087`](https://github.com/tbafe26/REST4/commit/087) | `GET /` 메인 페이지(서버 정보, 문서 링크) | 접속 안내 페이지 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1249,4 +1250,13 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 **확인** Swagger UI 상단에 제목과 버전, 설명이 표시됩니다.
 
 ![@Info 로 지정한 제목(API 서버), 버전(beta), 설명이 표시된 문서](docs/images/086.png)
+
+#### 087 메인 페이지 HomeController
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/087) · [변경 내용](https://github.com/tbafe26/REST4/commit/087)
+
+**무엇을** `domain/home/home/controller/HomeController` 를 추가했습니다. `GET /` 으로 접속하면 서버의 호스트 이름/주소와 **API 문서로 이동** 링크를 보여 줍니다.
+
+**왜** 프론트엔드 개발자가 서버 주소로 접속했을 때 빈 404 화면 대신 문서로 바로 갈 수 있는 안내가 있으면 편리합니다. 호스트 정보는 여러 서버 중 어디에 붙었는지 확인하는 데 쓰입니다.
+
+**확인** http://localhost:8080/ 접속 시 안내 페이지가 보입니다.
 
