@@ -133,6 +133,7 @@ com.back
 | [`024`](https://github.com/tbafe26/REST4/commit/024) | [실험] 댓글 삭제(GET 임시), @Transactional 없음 | 트랜잭션과 더티체킹 |
 | [`025`](https://github.com/tbafe26/REST4/commit/025) | 액션 메서드에 @Transactional / readOnly | 영속성 컨텍스트, orphanRemoval, readOnly 트랜잭션 |
 | [`026`](https://github.com/tbafe26/REST4/commit/026) | 삭제 응답을 Map(resultCode, msg) 으로 | 조회 외 응답의 결과 코드·메시지 |
+| [`027`](https://github.com/tbafe26/REST4/commit/027) | RsData(resultCode, msg) record | 공통 응답 객체 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -471,3 +472,17 @@ public String delete(@PathVariable int postId, @PathVariable int id) { ... }
 **왜** 조회가 아닌 요청(삭제, 작성, 수정)은 "성공했는지/어떤 결과인지"를 클라이언트가 **기계적으로** 판단할 수 있어야 합니다. 사람에게 보여줄 `msg` 와, 코드로 분기할 `resultCode` 를 함께 내려줍니다.
 
 **확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 댓글이 삭제되었습니다."}` 입니다.
+
+
+#### 027 RsData 도입
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/027) · [변경 내용](https://github.com/tbafe26/REST4/commit/027)
+
+**무엇을** `global/rsData/RsData` record(`resultCode`, `msg`) 를 만들고 댓글 삭제가 `RsData` 를 반환하게 했습니다.
+
+**왜** `resultCode` 와 `msg` 는 조회를 제외한 모든 응답에 필요한 공통 요소입니다. 매번 `Map` 에 키 문자열을 넣으면 오타가 나기 쉽고 응답 형태가 보장되지 않으므로 전용 타입으로 고정합니다.
+
+```java
+public record RsData(String resultCode, String msg) { }
+```
+
+**확인** 응답 JSON 은 026 과 같습니다.
