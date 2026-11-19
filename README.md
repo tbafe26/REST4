@@ -1223,6 +1223,7 @@ postService.flush(); // 지금까지의 변경을 DB 에 반영 → 댓글 id �
 | [`089`](https://github.com/tbafe26/REST4/commit/089) | 매핑마다 `produces = APPLICATION_JSON_VALUE` | 문서의 응답 미디어 타입 |
 | [`090`](https://github.com/tbafe26/REST4/commit/090) | `springdoc.default-produces-media-type` 설정 | 설정으로 일괄 적용 |
 | [`091`](https://github.com/tbafe26/REST4/commit/091) | HomeController `produces = TEXT_HTML_VALUE` | 예외적인 응답 타입 지정 |
+| [`092`](https://github.com/tbafe26/REST4/commit/092) | HomeController 에 @Tag, @Operation | 문서 설명 보강 |
 
 #### 084 SpringDoc 의존성 추가 — API 문서 자동 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/084) · [변경 내용](https://github.com/tbafe26/REST4/commit/084)
@@ -1306,3 +1307,12 @@ springdoc:
 **왜** 090 의 설정으로 모든 응답이 문서상 JSON 으로 표시되는데, 메인 페이지는 HTML 을 돌려줍니다. 예외인 곳만 명시해 문서에 올바른 응답 타입(`text/html`)이 나오게 합니다.
 
 **확인** Swagger UI `home` 그룹에서 메인 페이지 응답 타입이 `text/html` 입니다.
+
+#### 092 HomeController 문서 꾸미기
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/092) · [변경 내용](https://github.com/tbafe26/REST4/commit/092)
+
+**무엇을** `HomeController` 에 `@Tag(name = "HomeController", description = "홈 컨트롤러")`, `main` 에 `@Operation(summary = "메인 페이지")` 를 붙였습니다.
+
+**왜** 문서에는 기본적으로 클래스/메서드 이름만 나옵니다. 사람이 읽는 설명을 붙여 문서만 보고도 각 API 의 용도를 알 수 있게 합니다.
+
+**확인** Swagger UI 에 "홈 컨트롤러", "메인 페이지" 설명이 표시됩니다.
