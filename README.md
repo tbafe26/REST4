@@ -801,6 +801,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`050`](https://github.com/tbafe26/REST4/commit/050) | 글 작성 요청 테스트(MockMvc) | @SpringBootTest, @AutoConfigureMockMvc, @Transactional 롤백 |
 | [`051`](https://github.com/tbafe26/REST4/commit/051) | `.andDo(print())` | 테스트 중 요청/응답 확인 |
 | [`052`](https://github.com/tbafe26/REST4/commit/052) | `.andExpect(status().isCreated())` | 응답 검증 |
+| [`053`](https://github.com/tbafe26/REST4/commit/053) | `ResultActions` 로 요청/검증 분리 | 테스트 구조(요청 → 검증) |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -858,3 +859,20 @@ public class ApiV1PostControllerTest {
 **왜** 출력만으로는 사람이 매번 눈으로 확인해야 합니다. 기대값을 코드로 적어 두면 테스트가 자동으로 성공/실패를 판정합니다. 201 은 `ResponseAspect` 가 `resultCode` `201-1` 을 보고 설정한 값입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 053 요청과 검증 단계를 ResultActions 로 분리
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/053) · [변경 내용](https://github.com/tbafe26/REST4/commit/053)
+
+**무엇을** 요청 결과를 `ResultActions resultActions` 변수에 받고, 검증은 `resultActions.andExpect(...)` 로 따로 씁니다.
+
+**왜** 컨트롤러 테스트는 항상 "요청 → 검증" 두 단계입니다. 코드에서도 두 단계를 나눠 두면 검증 항목이 늘어나도 읽기 쉽습니다.
+
+```java
+ResultActions resultActions = mvc.perform(post("/api/v1/posts") ...).andDo(print());
+
+resultActions
+        .andExpect(status().isCreated());
+```
+
+**확인** 검증 내용은 052 와 같습니다.
