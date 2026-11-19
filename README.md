@@ -825,6 +825,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`074`](https://github.com/tbafe26/REST4/commit/074) | 내용 없이 작성 시 400 테스트 | 같은 규칙의 실패 케이스 추가 |
 | [`075`](https://github.com/tbafe26/REST4/commit/075) | 잘못된 JSON 시 400, HttpMessageNotReadableException 처리 | 역직렬화 실패 응답 |
 | [`076`](https://github.com/tbafe26/REST4/commit/076) | ApiV1PostCommentControllerTest 설정(MockMvc, PostService) | 테스트 클래스 공통 설정 |
+| [`077`](https://github.com/tbafe26/REST4/commit/077) | 댓글 단건조회 테스트 | 중첩 경로 요청, DB 대조 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1182,3 +1183,13 @@ String msg = ex.getBindingResult().getAllErrors().stream()
 **왜** 댓글 API 도 같은 방식(요청 → 검증)으로 테스트하기 위한 준비입니다. 댓글은 글을 통해 조회하므로 `PostService` 가 필요합니다.
 
 **확인** 테스트 메서드는 아직 없습니다.
+
+
+#### 077 댓글 단건조회 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/077) · [변경 내용](https://github.com/tbafe26/REST4/commit/077)
+
+**무엇을** `t1`("댓글 단건조회") 를 추가했습니다. `GET /api/v1/posts/1/comments/1` 응답의 id, 날짜, 내용을 `post.findCommentById(1)` 결과와 대조합니다.
+
+**왜** 글 단건조회 테스트와 같은 방식으로 댓글 조회 응답 스펙을 고정합니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostCommentControllerTest"`
