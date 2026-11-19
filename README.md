@@ -1427,6 +1427,7 @@ registry.addMapping("/api/**")
 | [`103`](https://github.com/tbafe26/REST4/commit/103) | 🔴 username 중복 시 409, `409-1` 기대 | 실패 시나리오 먼저 |
 | [`104`](https://github.com/tbafe26/REST4/commit/104) | 🟢 중복 검사 + MemberDuplicateUsernameException → 409-1 | 의미 있는 예외 클래스, 예외 핸들러 |
 | [`105`](https://github.com/tbafe26/REST4/commit/105) | 🔵 `findByUsername(...).ifPresent(_ -> throw)` | Optional, 이름 없는 변수 `_` |
+| [`106`](https://github.com/tbafe26/REST4/commit/106) | 제약 위반 시 400, `400-1` 테스트 | 기존 핸들러 재사용 확인 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1503,5 +1504,14 @@ memberRepository.findByUsername(username)
 ```
 
 **왜** "있으면 예외" 라는 의도가 한 흐름으로 읽힙니다. 동작은 같으므로 104 의 테스트가 그대로 통과해야 합니다. 테스트가 리팩터링의 안전망 역할을 합니다.
+
+**확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
+
+#### 106 회원가입 요청 본문 제약 위반 → 400 테스트 추가
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/106) · [변경 내용](https://github.com/tbafe26/REST4/commit/106)
+
+**무엇을** username(3자), password(4자), name(1자) 으로 가입을 요청하는 테스트 `t3` 를 추가했습니다. 세 필드의 `Size` 위반이 정렬된 메시지로 400, `400-1` 응답되어야 합니다.
+
+**왜** 글 작성에서 만든 `MethodArgumentNotValidException` 핸들러가 회원가입에도 그대로 적용되는지 확인합니다. 구현 변경 없이 통과해야 하므로 🔴 가 아니라 테스트만 추가한 커밋입니다.
 
 **확인** `./gradlew test --tests "*ApiV1MemberControllerTest"`
