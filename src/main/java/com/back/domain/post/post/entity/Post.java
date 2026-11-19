@@ -18,25 +18,25 @@ import static jakarta.persistence.CascadeType.REMOVE;
 @Getter
 @NoArgsConstructor
 public class Post extends BaseEntity {
-    private String title;
-    private String content;
+    private String subject;
+    private String body;
 
     // 글을 저장/삭제하면 댓글도 함께 저장/삭제되고, 목록에서 빠진 댓글은 DB에서도 지운다
     @OneToMany(mappedBy = "post", cascade = {PERSIST, REMOVE}, orphanRemoval = true)
     private final List<PostComment> comments = new ArrayList<>();
 
-    public Post(String title, String content) {
-        this.title = title;
-        this.content = content;
+    public Post(String subject, String body) {
+        this.subject = subject;
+        this.body = body;
     }
 
-    public void modify(String title, String content) {
-        this.title = title;
-        this.content = content;
+    public void modify(String subject, String body) {
+        this.subject = subject;
+        this.body = body;
     }
 
-    public PostComment addComment(String content) {
-        PostComment postComment = new PostComment(this, content);
+    public PostComment addComment(String body) {
+        PostComment postComment = new PostComment(this, body);
         comments.add(postComment);
 
         return postComment;
