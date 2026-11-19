@@ -812,6 +812,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`061`](https://github.com/tbafe26/REST4/commit/061) | 글 수정 테스트에 handler, resultCode, msg 검증 | 응답 본문 검증 |
 | [`062`](https://github.com/tbafe26/REST4/commit/062) | 수정 후 DB 값 assertThat 검증(선택) | AssertJ |
 | [`063`](https://github.com/tbafe26/REST4/commit/063) | DB 재조회 검증 제거 | 컨트롤러 테스트의 범위 |
+| [`064`](https://github.com/tbafe26/REST4/commit/064) | 글 삭제 테스트(DELETE, 200-1) | delete() 요청 빌더 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1003,5 +1004,15 @@ resultActions
 **무엇을** 062 에서 추가한 DB 재조회 검증을 지웠습니다.
 
 **왜** 컨트롤러 테스트는 **요청에 대한 응답**을 검증하는 것이 목적입니다. 저장 로직의 정확성은 서비스/리포지터리 쪽 관심사이고, 컨트롤러 테스트마다 DB 를 다시 확인하면 테스트가 길어지고 중복됩니다.
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 064 글 삭제 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/064) · [변경 내용](https://github.com/tbafe26/REST4/commit/064)
+
+**무엇을** `t3`("글 삭제") 를 추가했습니다. `DELETE /api/v1/posts/1` 후 handler(delete), 200, `resultCode` `200-1`, `msg` 를 검증합니다.
+
+**왜** 글 CRUD 중 삭제도 테스트로 보호합니다. 롤백되므로 1번 글을 지워도 다른 테스트에 영향이 없습니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
