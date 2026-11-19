@@ -142,6 +142,7 @@ com.back
 | [`032`](https://github.com/tbafe26/REST4/commit/032) | ForPostRsData 제거, data 타입 Object | 범용화(Object)의 대가 |
 | [`033`](https://github.com/tbafe26/REST4/commit/033) | RsData<T> 제네릭, 글 삭제는 RsData<PostDto> | 제네릭으로 타입 안정성 확보 |
 | [`034`](https://github.com/tbafe26/REST4/commit/034) | 댓글 삭제 RsData<PostCommentDto> | raw 타입 지양 |
+| [`035`](https://github.com/tbafe26/REST4/commit/035) | 삭제 응답 RsData<Void>, data 없는 생성자 | Void 타입 인자 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -568,3 +569,19 @@ public record RsData<T>(String resultCode, String msg, T data) { }
 **왜** raw 타입 `RsData` 는 사실상 `RsData<Object>` 처럼 동작해 제네릭을 도입한 이점(타입 검사)을 잃습니다. 모든 곳에서 타입 인자를 명시합니다.
 
 **확인** 응답 JSON 은 이전과 같습니다.
+
+
+#### 035 데이터가 필요 없는 응답은 RsData<Void>
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/035) · [변경 내용](https://github.com/tbafe26/REST4/commit/035)
+
+**무엇을** 글/댓글 삭제 응답에서 `data` 를 빼고 반환 타입을 `RsData<Void>` 로 바꿨습니다. `RsData` 에는 `resultCode`, `msg` 만 받는 보조 생성자를 추가했습니다.
+
+**왜** 삭제된 대상의 정보는 클라이언트가 이미 알고 있으므로 굳이 돌려줄 필요가 없습니다. "데이터가 없다"는 사실을 `RsData<Void>` 로 **타입에 명시**하면 읽는 사람이 바로 알 수 있습니다.
+
+```java
+public RsData(String resultCode, String msg) {
+    this(resultCode, msg, null);
+}
+```
+
+**확인** 삭제 응답이 `{"resultCode":"200-1","msg":"1번 글이 삭제되었습니다.","data":null}` 입니다.
