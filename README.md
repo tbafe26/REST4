@@ -1440,6 +1440,7 @@ registry.addMapping("/api/**")
 | [`116`](https://github.com/tbafe26/REST4/commit/116) | 🟢 Post.author, PostComment.author(@ManyToOne LAZY), DTO 에 authorId/authorName | 다대일 연관관계, 생성 시 필수 값 |
 | [`117`](https://github.com/tbafe26/REST4/commit/117) | 🔴 `POST /api/v1/posts?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 요구 변경 시 기존 테스트 먼저 수정 |
 | [`118`](https://github.com/tbafe26/REST4/commit/118) | 🟢 글 작성에 `actorId` 적용, 임시 system 작성자 제거 | 행위자 = 작성자 |
+| [`119`](https://github.com/tbafe26/REST4/commit/119) | 🔴 `POST .../comments?actorId=` 작성자 검증, 누락/없는 회원 → 401 | 같은 규칙을 댓글에 |
 
 #### 100 회원 도메인 뼈대 — Member, MemberRepository, MemberService, ApiV1MemberController
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/100) · [변경 내용](https://github.com/tbafe26/REST4/commit/100)
@@ -1675,3 +1676,12 @@ Post post = postService.write(actor, reqBody.title, reqBody.content);
 **왜** 117 의 테스트를 통과시키는 구현입니다. 내 정보 API 에서 만든 "누락·잘못된 actorId → 401" 규칙을 그대로 재사용합니다. 요청 본문 검증(`@Valid`)은 메서드 실행 전에 일어나므로 제목/내용 검증 실패 테스트(400)는 actorId 없이도 그대로 통과합니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+#### 119 🔴 댓글 작성 시 actorId 를 작성자로 — 테스트
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/119) · [변경 내용](https://github.com/tbafe26/REST4/commit/119)
+
+**무엇을** 댓글 작성 테스트 `t5` 를 `?actorId={user2 번호}` 로 요청하고 `data.authorId`, `data.authorName` 이 user2 이어야 하도록 바꿨습니다. `actorId` 없이(`t7`), 존재하지 않는 `actorId` 로(`t8`) 작성하면 401 이어야 합니다.
+
+**왜** 글 작성과 같은 요구를 댓글에도 적용합니다. 지금은 임시 `system` 작성자라서 실패합니다.
+
+**확인** 3개 테스트가 실패합니다. `댓글 작성`: `$.data.authorId expected:<4> but was:<1>`(user2 가 아니라 임시 작성자 system), `actorId 없음`/`존재하지 않는 actorId`: `Status expected:<401> but was:<201>`.
