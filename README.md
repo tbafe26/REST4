@@ -127,6 +127,7 @@ com.back
 | [`019`](https://github.com/tbafe26/REST4/commit/019) | PostDto 에 @Getter | Lombok @Getter, 직렬화 대상 속성 |
 | [`020`](https://github.com/tbafe26/REST4/commit/020) | PostDto → record | record, 불변 DTO |
 | [`021`](https://github.com/tbafe26/REST4/commit/021) | DTO 필드명을 createDate/modifyDate/title/content 로 | DTO 덕분에 엔티티 수정 없이 응답 변경 |
+| [`022`](https://github.com/tbafe26/REST4/commit/022) | `.map(PostDto::new)` | 생성자 메서드 참조 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -398,3 +399,13 @@ public record PostDto(int id, LocalDateTime createdDate, LocalDateTime modifiedD
 **왜** 이번에는 **DTO 한 파일만** 바뀌었습니다. 엔티티·서비스·DB 는 그대로입니다. 014~015 에서 엔티티를 고쳤을 때와 비교하면 DTO 를 두는 이유가 분명해집니다.
 
 **확인** `curl http://localhost:8080/api/v1/posts/1` 응답 키가 `id, createDate, modifyDate, title, content` 입니다.
+
+
+#### 022 메서드 참조로 DTO 변환 간소화
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/022) · [변경 내용](https://github.com/tbafe26/REST4/commit/022)
+
+**무엇을** 다건조회의 `.map(p -> new PostDto(p))` 를 `.map(PostDto::new)` 로 바꿨습니다.
+
+**왜** 람다가 인자를 그대로 생성자에 넘기기만 할 때는 생성자 메서드 참조로 줄여 쓸 수 있습니다. 동작은 같습니다.
+
+**확인** 응답은 이전과 같습니다.
