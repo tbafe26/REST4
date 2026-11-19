@@ -821,6 +821,7 @@ public RsData(String resultCode, String msg, T data) {
 | [`070`](https://github.com/tbafe26/REST4/commit/070) | 🟢 GlobalExceptionHandler 로 NoSuchElementException 처리 | @ControllerAdvice, @ExceptionHandler |
 | [`071`](https://github.com/tbafe26/REST4/commit/071) | @RestControllerAdvice + @ResponseStatus(NOT_FOUND) | 예외 응답 상태 코드 지정 방법 A |
 | [`072`](https://github.com/tbafe26/REST4/commit/072) | ResponseEntity 방식 + @ControllerAdvice | 예외 응답 상태 코드 지정 방법 B |
+| [`073`](https://github.com/tbafe26/REST4/commit/073) | 제목 없이 작성 시 400, MethodArgumentNotValidException 처리 | @Valid 실패 응답 |
 
 #### 049 컨트롤러 테스트 클래스 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/049) · [변경 내용](https://github.com/tbafe26/REST4/commit/049)
@@ -1127,5 +1128,24 @@ public ResponseEntity<RsData<Void>> handle() {
     return new ResponseEntity<>(new RsData<>("404-1", "해당 데이터가 존재하지 않습니다."), NOT_FOUND);
 }
 ```
+
+**확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
+
+
+#### 073 제목 없이 글 작성 → 400
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/073) · [변경 내용](https://github.com/tbafe26/REST4/commit/073)
+
+**무엇을** 제목이 빈 문자열인 글 작성 테스트(`t7`)와, `MethodArgumentNotValidException` 핸들러를 추가했습니다. 핸들러는 필드 오류를 `필드-제약-메시지` 형태로 만들어 정렬한 뒤 줄바꿈으로 이어 `400-1` 로 응답합니다. 기존 404 핸들러에는 예외 매개변수를 명시했습니다.
+
+```java
+String msg = ex.getBindingResult().getAllErrors().stream()
+        .filter(error -> error instanceof FieldError)
+        .map(error -> (FieldError) error)
+        .map(error -> error.getField() + "-" + error.getCode() + "-" + error.getDefaultMessage())
+        .sorted()
+        .collect(Collectors.joining("\n"));
+```
+
+**왜** `@Valid` 검증에 실패하면 스프링이 `MethodArgumentNotValidException` 을 던지고 기본 오류 응답이 나갑니다. 클라이언트가 어떤 필드가 왜 틀렸는지 알 수 있도록 `RsData` 형식으로 바꿉니다. 오류 순서는 실행마다 달라질 수 있어 **정렬**해야 테스트가 안정적입니다.
 
 **확인** `./gradlew test --tests "*ApiV1PostControllerTest"`
