@@ -9,6 +9,7 @@
 ## 목차
 - [기술 스택과 실행 방법](#기술-스택과-실행-방법)
 - [커밋 따라가는 방법](#커밋-따라가는-방법)
+- [실험 커밋 목록](#실험-커밋-목록)
 - [작업내역](#작업내역)
 
 ## 기술 스택과 실행 방법
@@ -46,6 +47,14 @@
   - 🟢 Green : 테스트를 통과하도록 구현한 커밋
   - 🔵 Refactor : 동작은 그대로 두고 구조를 다듬은 커밋
 
+## 실험 커밋 목록
+
+일부러 문제가 드러나는 상태를 남긴 커밋입니다. 바로 뒤 커밋에서 해결합니다.
+
+| 태그 | 실험 | 드러나는 문제 |
+|---|---|---|
+| [`009`](https://github.com/tbafe26/REST4/commit/009) | 엔티티를 그대로 JSON 으로 반환 | 글 ↔ 댓글 순환 참조로 직렬화가 끝나지 않음 (`Document nesting depth (501) exceeds the maximum allowed`) |
+
 ## 작업내역
 
 ### 0부. 저장소 준비 (001)
@@ -68,6 +77,7 @@
 | [`006`](https://github.com/tbafe26/REST4/commit/006) | Post, PostComment 엔티티(1:N, cascade, orphanRemoval) | 연관관계 매핑, cascade |
 | [`007`](https://github.com/tbafe26/REST4/commit/007) | PostRepository, PostService | Spring Data JPA, 서비스 계층 |
 | [`008`](https://github.com/tbafe26/REST4/commit/008) | 샘플 데이터(글 3, 댓글 5) 생성 | ApplicationRunner, 자기 주입 @Lazy |
+| [`009`](https://github.com/tbafe26/REST4/commit/009) | [실험] 글 다건조회 API, 엔티티 순환 참조로 JSON 무한 중첩 | Jackson 직렬화, 순환 참조 |
 
 #### 002 스프링부트 프로젝트 생성
 [이 시점의 코드](https://github.com/tbafe26/REST4/tree/002) · [변경 내용](https://github.com/tbafe26/REST4/commit/002)
@@ -163,3 +173,12 @@ private BaseInitData self;
 ```
 
 **확인** `./gradlew test` 통과. 서버 시작 로그에 글 3건, 댓글 5건의 `insert` SQL 이 출력됩니다.
+
+#### 009 [실험] 글 다건조회 API — 순환 참조로 JSON 무한 루프
+[이 시점의 코드](https://github.com/tbafe26/REST4/tree/009) · [변경 내용](https://github.com/tbafe26/REST4/commit/009)
+
+**무엇을** `ApiV1PostController` 를 만들어 `GET /api/v1/posts` 가 `List<Post>` 엔티티를 그대로 반환하게 했습니다(`@Controller` + `@ResponseBody`).
+
+**왜** 가장 단순한 방식으로 JSON 응답을 만들어 보고, 엔티티를 그대로 내보낼 때 어떤 문제가 생기는지 확인하려는 실험입니다. `Post.comments` 의 각 댓글이 `post` 를 다시 가리키고, 그 글이 또 `comments` 를 가리키는 순환 참조 때문에 Jackson 이 직렬화를 끝내지 못합니다.
+
+> **확인해 볼 것** 서버를 띄워 `curl -i http://localhost:8080/api/v1/posts` 를 호출하면 응답이 `200` 으로 시작하지만 `comments → post → comments → …` 가 끝없이 중첩되다 잘립니다. 서버 로그에는 `HttpMessageNotWritableException: Could not write JSON: Document nesting depth (501) exceeds the maximum allowed (500)` 가 남습니다. 다음 단계에서 해결합니다.
